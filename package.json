@@ -1,0 +1,22 @@
+{
+  "name": "assignment-manager-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryancen404/assignment-manager-backend.git"
+  },
+  "author": "ryancen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ryancen404/assignment-manager-backend/issues"
+  },
+  "homepage": "https://github.com/ryancen404/assignment-manager-backend#readme",
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  }
+}
