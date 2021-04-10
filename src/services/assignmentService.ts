@@ -6,7 +6,7 @@ import { Assignment } from "../../type";
  * @param tid 教师用户id
  * @returns 
  */
-const getAssignmentList = (tid: string): Assignment[] => {
+const getAssignmentList = (_tid: string): Assignment[] | null => {
     return null;
 };
 
@@ -15,7 +15,7 @@ const getAssignmentList = (tid: string): Assignment[] => {
  * @param assignId 作业唯一id
  * @return 找不到会为空
  */
-const getAssignmentDetail = (assignId: string): Assignment | null  => {
+const getAssignmentDetail = (_assignId: string): Assignment | null  => {
     return null;
 };
 
@@ -31,12 +31,12 @@ const createNewAssignment = (): boolean => {
 /**
  * 删除assignment
  */
-const deleteAssignment = (assignId: string): boolean => {
+const deleteAssignment = (_assignId: string): boolean => {
     return true;
 };
 
 
-const updateAssignment = (assignId: string): boolean => {
+const updateAssignment = (_assignId: string): boolean => {
     return true;
 };
 

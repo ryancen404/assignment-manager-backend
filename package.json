@@ -9,7 +9,7 @@
     "lint": "eslint --ext .ts .",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "start": "npm build && node build/index.js"
+    "start": "npm run-script build && node build/index.js"
   },
   "repository": {
     "type": "git",
@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.17.1"
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.3"
   }
 }

@@ -22,7 +22,7 @@ assignmentRouter.get("/:assignId", (req, res) => {
     }
 });
 
-assignmentRouter.post("/", (req, res) => {
+assignmentRouter.post("/", (_req, res) => {
     const result = assignmentService.createNewAssignment();
     resultNotNullHandle(result, res);
 });
