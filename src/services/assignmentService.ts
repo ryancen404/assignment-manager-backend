@@ -6,8 +6,8 @@ import { Assignment } from "../../type";
  * @param tid 教师用户id
  * @returns 
  */
-const getAssignmentList = (_tid: string): Assignment[] | null => {
-    return null;
+const getAssignmentList = (_tid: string): Assignment[] => {
+    return [];
 };
 
 /**
@@ -25,6 +25,7 @@ const getAssignmentDetail = (_assignId: string): Assignment | null  => {
  * @returns is succeed add to db
  */
 const createNewAssignment = (): boolean => {
+    
     return true;
 };
 

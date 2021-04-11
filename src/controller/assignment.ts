@@ -4,6 +4,10 @@ import { resultNotNullHandle } from '../utils/controllerUtils';
 
 const assignmentRouter = Router();
 
+/**
+ * According to the teacher's ID to find his asignment list
+ * @router tid teacher's ID
+ */
 assignmentRouter.get("/:tid", (req, res) => {
     const assignmentList = assignmentService.getAssignmentList(req.params.tid);
     if (assignmentList) {

@@ -1,16 +1,23 @@
+/**
+ * @var tid: 所属的教师id
+ */
 export interface BaseAssignment {
     assignId: string,
+    tid: string,
     assignName: string,
     description?: string,
 }
 
 export interface Assignment extends BaseAssignment {
     // 时间区间
-    timeFromTo: string,
+    startTime: string,
+    endTime: string,
     // 与作业关联的班级数组
     classs: BaseClass[],
     // 当前作业状态，以时间区间作为状态依据
     status: AssignmentStatus,
+    // 是否已经被我(教师)批改, todo delete nullable
+    corrected?: boolean,
     // 附件列表
     files?: AssignmentFile[]
 }
@@ -66,11 +73,32 @@ export interface ClassStudent {
 
 /**
  * Student作业完成情况类型
+ * @field status: 学生是否已经完成作业
  * @field scroe: 分数
+ * @field corrected: 我(学生)作业是否已经被老师批改
  */
 export interface StudentAssignment extends BaseAssignment, ClassStudent {
-    status: AssignmentComplete,
+    status: boolean,
+    corrected: boolean
     score: number,
 }
 
-export type AssignmentComplete = "已完成" | "未完成";
+
+/**
+ * 教师用户
+ */
+export interface Teacher {
+    tId: number,
+    username: string,
+    avator: string,
+    classs: BaseClass[],
+}
+
+/**
+ * 学生端用户
+ */
+export interface StudentUser {
+    username: string,
+    avator: string,
+    studentNumber: string,
+}
