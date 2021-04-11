@@ -8,7 +8,12 @@ const error = (...params: unknown[]) => {
     console.error(...params);
 };
 
+const reqError = (...params: unknown[]) => {
+    error("[request] error", params);
+};
+
 export default {
     info,
-    error
+    error,
+    reqError
 };

@@ -4,7 +4,7 @@ import cors from "cors";
 import mongoose from 'mongoose';
 import assignmentRouter from "./controller/assignment";
 import classRouter from "./controller/class";
-import usersRouter from "./controller/users";
+import teacherRouter from "./controller/tacher";
 import middleware from './utils/middleware';
 import config from './utils/config';
 import logger from './utils/logger';
@@ -38,7 +38,7 @@ app.use(middleware.requestLogger);
 // config router middleware
 app.use('/api/assignment', assignmentRouter);
 app.use('api/class', classRouter);
-app.use('api/user', usersRouter);
+app.use('api/user/teacher', teacherRouter);
 
 app.get('/ping', (_req, res) => {
   console.log('someone pinged here');
@@ -47,5 +47,6 @@ app.get('/ping', (_req, res) => {
 
 // config middleware after router
 app.use(middleware.unknownEndpoint);
+app.use(middleware.errorHandler);
 
 export default app;

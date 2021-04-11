@@ -8,11 +8,15 @@ const teacherSchema = new mongoose.Schema({
         required: true
     },
     avator: String,
+    college: {
+        type: String,
+        required: true
+    },
     class: [{
         type: mongoose.Types.ObjectId,
         ref: "Classs"
     }],
-    assignments:[{
+    assignments: [{
         type: mongoose.Types.ObjectId,
         ref: "Assignment"
     }]

@@ -1,4 +1,5 @@
-import { Request, RequestHandler, Response } from 'express';
+import { ErrorRequestHandler, Request, RequestHandler, Response } from 'express';
+import { API, ParamError, ResultError } from '../../type';
 import logger from './logger';
 
 /**
@@ -17,7 +18,32 @@ const requestLogger: RequestHandler = (request, _res, next) => {
     next();
 };
 
+const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
+    logger.reqError(`cause by: ${error.message}`);
+
+    if (error instanceof ResultError) {
+        return response.status(500).json(
+            API.createFailResponse("Server handle error!"));
+    } else if (error instanceof ParamError) {
+        return response.status(400).json(
+            API.createFailResponse(error.message));
+    }
+
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' });
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: 'validation error' });
+    } else if (error.name === 'JsonWebTokenError') {
+        return response.status(401).json({
+            error: 'invalid token'
+        });
+    }
+    // logger.error(error.message);
+    return next(error);
+};
+
 export default {
     unknownEndpoint,
-    requestLogger
+    requestLogger,
+    errorHandler
 };
