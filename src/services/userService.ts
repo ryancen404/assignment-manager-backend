@@ -1,6 +1,6 @@
-import { NewTeacher } from "../../type";
+import { BaseTeacher } from "../../type";
 
-const createNewTeacher = async (_teacher: NewTeacher): Promise<boolean> => {
+const createNewTeacher = async (_teacher: BaseTeacher): Promise<boolean> => {
     return Promise.resolve(true);
 };
 

@@ -92,12 +92,16 @@ export interface Teacher {
     tId: number,
     username: string,
     college: string,
+    // 头像链接
     avator?: string,
-    classs: BaseClass[],
-    assignments: BaseAssignment[]
+    // class对象的id数组
+    classs: string[],
+    // assignment的 id数组
+    assignments: string[]
 }
+
 // 创建新教师用户使用
-type NewTeacher = Omit<Teacher, "tId" | "classs" | "assignments">;
+type BaseTeacher = Omit<Teacher, "tId" | "classs" | "assignments">;
 
 /**
  * 学生端用户
@@ -108,61 +112,14 @@ export interface StudentUser {
     studentNumber: string,
 }
 
-// 自定义错误
-/**
- * 请求最终处理的结果错误
- */
-export class ResultError extends Error {
-    constructor(msg: string) {
-        super(msg);
-        this.name = 'ResultError';
-    }
-}
-/**
- * 参数解析错误
- */
-export class ParamError extends Error {
-    constructor(msg) {
-        super(msg);
-        this.name = 'Param Error';
-    }
-}
-
-declare namespace API {
+export declare namespace API {
     // 自定义请求结果
-    declare const STATUS_SUCCESS = 1;
-    declare const STATUS_FAIL = 0;
 
-    type statusCode = STATUS_SUCCESS | STATUS_FAIL;
+    type statusCode = 0 | 1;
 
     export interface BaseResponse {
         statusCode: statusCode,
         message?: string,
         content?: unknown,
     }
-
-    /**
-    * 创建成功的响应结果
-    * @param object 处理结果
-    * @returns 成功的Response
-    */
-    export const createSucessResponse = (object: unknown): BaseResponse => {
-        return {
-            statusCode: STATUS_SUCCESS,
-            content: object
-        };
-    };
-
-    export const createEmptySucessResponse = (): BaseResponse => {
-        return {
-            statusCode: STATUS_SUCCESS
-        };
-    };
-
-    export const createFailResponse = (message: string): BaseResponse => {
-        return {
-            statusCode: STATUS_FAIL,
-            message
-        };
-    };
 }

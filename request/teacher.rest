@@ -1,0 +1,10 @@
+# New Teacher
+
+POST http://localhost:3001/api/user/teacher/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "root",
+    "college": "理学院",
+    "avator": "https://www.baidu.com"
+}

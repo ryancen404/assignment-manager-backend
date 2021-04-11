@@ -1,6 +1,7 @@
 import { ErrorRequestHandler, Request, RequestHandler, Response } from 'express';
-import { API, ParamError, ResultError } from '../../type';
-import logger from './logger';
+import { createFailResponse } from '../utils/APIUtils';
+import logger from '../utils/logger';
+import { ParamError, ResultError } from './customError';
 
 /**
  * 未知请求时处理的中间件
@@ -22,11 +23,9 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
     logger.reqError(`cause by: ${error.message}`);
 
     if (error instanceof ResultError) {
-        return response.status(500).json(
-            API.createFailResponse("Server handle error!"));
+        return response.status(500).json(createFailResponse("Server handle error!"));
     } else if (error instanceof ParamError) {
-        return response.status(400).json(
-            API.createFailResponse(error.message));
+        return response.status(400).json(createFailResponse(error.message));
     }
 
     if (error.name === 'CastError') {

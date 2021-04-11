@@ -1,6 +1,5 @@
 import {Router} from 'express';
 import assignmentService from "../services/assignmentService";
-import { resultNotNullHandle } from '../utils/controllerUtils';
 
 const assignmentRouter = Router();
 
@@ -26,10 +25,9 @@ assignmentRouter.get("/:assignId", (req, res) => {
     }
 });
 
-assignmentRouter.post("/", (_req, res) => {
-    const result = assignmentService.createNewAssignment();
-    resultNotNullHandle(result, res);
-});
+// assignmentRouter.post("/", (_req, res) => {
+//     const result = assignmentService.createNewAssignment();
+// });
 
 
 export default assignmentRouter;
