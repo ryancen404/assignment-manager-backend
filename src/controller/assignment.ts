@@ -25,9 +25,12 @@ assignmentRouter.get("/:assignId", (req, res) => {
     }
 });
 
-// assignmentRouter.post("/", (_req, res) => {
-//     const result = assignmentService.createNewAssignment();
-// });
+/**
+ * c
+ */
+assignmentRouter.post("/", (_req, res) => {
+    const result = assignmentService.createNewAssignment();
+});
 
 
 export default assignmentRouter;

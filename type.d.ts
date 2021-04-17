@@ -1,4 +1,6 @@
-// 代码中自定义的实体类型
+// 代码中所有用到的基本类型，在不同的模块中有不同的Omit/Pick type
+// @see contoller/type.d.ts
+
 /**
  * @var tid: 所属的教师id
  */
@@ -17,8 +19,8 @@ export interface Assignment extends BaseAssignment {
     classs: BaseClass[],
     // 当前作业状态，以时间区间作为状态依据
     status: AssignmentStatus,
-    // 是否已经被我(教师)批改, todo delete nullable
-    corrected?: boolean,
+    // 是否已经被我(教师)批改
+    corrected: boolean,
     // 附件列表
     files?: AssignmentFile[]
 }
@@ -99,9 +101,6 @@ export interface Teacher {
     // assignment的 id数组
     assignments: string[]
 }
-
-// 创建新教师用户使用
-type BaseTeacher = Omit<Teacher, "tId" | "classs" | "assignments">;
 
 /**
  * 学生端用户

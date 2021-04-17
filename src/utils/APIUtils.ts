@@ -10,13 +10,19 @@ export const checkResultCorrected = (result: unknown | undefined | false) => {
     }
 };
 
-export const isString = (text: unknown): text is string => {
+const isString = (text: unknown): text is string => {
     return typeof text === 'string' || text instanceof String;
+};
+
+const isNumber = (n: unknown): n is number => {
+    return typeof n === "number" || n instanceof Number;
 };
 
 export const isDate = (date: string): boolean => {
     return Boolean(Date.parse(date));
 };
+
+
 
 /**
  * 参数校验
@@ -28,6 +34,12 @@ export const parseString = (text: unknown, name?: string): string => {
     return text;
 };
 
+export const parseNumber = (n: unknown, name?: string): number => {
+    if(!n || !isNumber(n)) {
+        throw new ParamError(`Incorrect or missing ${name}: ` + n);
+    }
+    return n;
+};
 
 /**
  * 创建成功的响应结果

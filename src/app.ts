@@ -7,6 +7,7 @@ import teacherRouter from "./controller/teacher";
 import middleware from './other/middleware';
 import config from './utils/config';
 import logger from './utils/logger';
+import loginRouter from './controller/login';
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(cors());
 app.use(middleware.requestLogger);
 
 // config router middleware
+app.use('/api/login', loginRouter);
 app.use('/api/assignment', assignmentRouter);
 app.use('/api/class', classRouter);
 app.use('/api/user/teacher', teacherRouter);

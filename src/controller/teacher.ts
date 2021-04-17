@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { BaseTeacher } from '../../type';
-import userService from '../services/userService';
+import { User } from './requestType';
+import userService from '../services/teacherService';
 import { checkResultCorrected, createEmptySucessResponse, parseString } from '../utils/APIUtils';
 
 const teacherRouter = Router();
 
+// 创建教师用户
 teacherRouter.post("/", async (req, res) => {
     const newTeacher = toNewTeacher(req.body);
     const result = await userService.createNewTeacher(newTeacher);
@@ -24,13 +25,10 @@ teacherRouter.post("/", async (req, res) => {
 /**
  * 请求参数校验
  */
-interface BaseTeacherBody {
-    username: unknown,
-    college: unknown,
-    avator: unknown
-}
-const toNewTeacher = ({ username, college, avator }: BaseTeacherBody): BaseTeacher => {
-    const newTeacher: BaseTeacher = {
+type newTeacherField = { username: unknown, college: unknown, avator: unknown };
+
+const toNewTeacher = ({ username, college, avator }: newTeacherField): User.NewTeacher => {
+    const newTeacher: User.NewTeacher = {
         username: parseString(username, "username"),
         college: parseString(college, "college"),
         avator: parseString(avator, "avator")
@@ -38,6 +36,5 @@ const toNewTeacher = ({ username, college, avator }: BaseTeacherBody): BaseTeach
     return newTeacher;
 };
 
-// interface UpdateTeacherBody extends BaseTeacherBody {}
 
 export default teacherRouter;
