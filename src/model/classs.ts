@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import mongoose from "mongoose";
+import mongoose, { Types, Document, Schema, Model } from "mongoose";
+import { StudentDocument } from "./student";
 
-const classsSchema = new mongoose.Schema({
+const ClasssSchema = new Schema<ClasssDocument, ClasssModel>({
     className: {
         type: String,
         required: true
@@ -12,12 +13,38 @@ const classsSchema = new mongoose.Schema({
         required: true,
     },
     students: [{
-        type: mongoose.Types.ObjectId,
+        type: Types.ObjectId,
         ref: "Student"
     }]
 });
 
-classsSchema.set('toJSON', {
+export interface Classs {
+    className: string,
+    classNumber: string,
+    students: Array<Types.ObjectId>
+}
+
+export interface ClasssDocument extends Classs, Document {
+    students: Types.Array<StudentDocument["_id"]>,
+}
+
+export interface ClassPopulateDocument extends ClasssDocument {
+    students: Types.Array<StudentDocument>
+}
+
+export interface ClasssModel extends Model<ClasssDocument> {
+    findMyStudents(id: string): Promise<ClassPopulateDocument>
+}
+
+ClasssSchema.statics.findMyStudents = async function (
+    this: Model<ClasssDocument>,
+    id: string
+) {
+    return this.findById(id).populate("students").exec();
+};
+
+
+ClasssSchema.set('toJSON', {
     transfrom: (_document: any, returnObject: any) => {
         returnObject.classId = returnObject._id.toString();
         delete returnObject._id;
@@ -25,4 +52,4 @@ classsSchema.set('toJSON', {
     }
 });
 
-export default mongoose.model("Classs", classsSchema);
+export default mongoose.model<ClasssDocument, ClasssModel>("Classs", ClasssSchema);

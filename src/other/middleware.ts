@@ -38,6 +38,7 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
         });
     }
     // logger.error(error.message);
+    response.status(500).json("unkown error");
     return next(error);
 };
 

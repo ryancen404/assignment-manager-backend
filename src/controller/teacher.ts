@@ -10,7 +10,7 @@ teacherRouter.post("/", async (req, res) => {
     const newTeacher = toNewTeacher(req.body);
     const result = await userService.createNewTeacher(newTeacher);
     checkResultCorrected(result);
-    res.json(createEmptySucessResponse());
+    res.status(400).json(createEmptySucessResponse());
 });
 
 /**
@@ -25,13 +25,18 @@ teacherRouter.post("/", async (req, res) => {
 /**
  * 请求参数校验
  */
-type newTeacherField = { username: unknown, college: unknown, avator: unknown };
-
-const toNewTeacher = ({ username, college, avator }: newTeacherField): User.NewTeacher => {
+type NewTeacherField = {
+    account: unknown,
+    password: unknown,
+    username: unknown,
+    college: unknown,
+};
+const toNewTeacher = ({ account, password, username, college }: NewTeacherField): User.NewTeacher => {
     const newTeacher: User.NewTeacher = {
+        account: parseString(account, "account"),
+        password: parseString(password, "passowrd"),
         username: parseString(username, "username"),
         college: parseString(college, "college"),
-        avator: parseString(avator, "avator")
     };
     return newTeacher;
 };

@@ -1,4 +1,3 @@
-import { Assignment } from "../../type";
 
 /**
  * 通过教师端id获取所属的作业Preview列表
@@ -6,7 +5,7 @@ import { Assignment } from "../../type";
  * @param tid 教师用户id
  * @returns 
  */
-const getAssignmentList = (_tid: string): Assignment[] => {
+const getAssignmentList = (_tid: string) => {
     return [];
 };
 
@@ -15,7 +14,7 @@ const getAssignmentList = (_tid: string): Assignment[] => {
  * @param assignId 作业唯一id
  * @return 找不到会为空
  */
-const getAssignmentDetail = (_assignId: string): Assignment | null  => {
+const getAssignmentDetail = (_assignId: string) => {
     return null;
 };
 

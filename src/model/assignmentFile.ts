@@ -1,8 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import mongoose from 'mongoose';
+import { Document, model, Model, Schema } from 'mongoose';
 
-const assignmentFileSchema = new mongoose.Schema({
+export interface AssignmentFile {
+    name: string,
+    link: string,
+    md: string,
+    length: number
+}
+
+export interface AssignmentFileDocument extends AssignmentFile, Document {
+}
+
+export type AssignmentFileModel = Model<AssignmentFileDocument>;
+
+const assignmentFileSchema = new Schema<AssignmentFileDocument, AssignmentFileModel>({
     name: {
         type: String,
         required: true,
@@ -16,6 +28,7 @@ const assignmentFileSchema = new mongoose.Schema({
     length: Number,
 });
 
+
 assignmentFileSchema.set('toJSON', {
     transfrom: (_document: any, returnObject: any) => {
         returnObject.fid = returnObject._id.toString();
@@ -24,4 +37,4 @@ assignmentFileSchema.set('toJSON', {
     }
 });
 
-export default mongoose.model("AssignmentFile", assignmentFileSchema);
+export default model<AssignmentFileDocument, AssignmentFileModel>("AssignmentFile", assignmentFileSchema);

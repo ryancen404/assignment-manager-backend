@@ -6,6 +6,8 @@ dotenv.config();
 const APP_PORT = process.env.APP_PORT!;
 const USER_NAME = process.env.USER_NAME!;
 const PASSWORD = process.env.PASSWORD!;
+const USER_PWD_SALT = parseInt(process.env.USER_PASSWORD_SALT!);
+const TOKEN_SECRET = process.env.TOKE_SECRET!;
 let MONGODB_URL = process.env.MONGODB_URL!;
 
 if (process.env.NODE_ENV === 'test') {
@@ -16,5 +18,7 @@ export default {
     APP_PORT,
     MONGODB_URL,
     USER_NAME,
-    PASSWORD
+    PASSWORD,
+    USER_PWD_SALT,
+    TOKEN_SECRET
 };

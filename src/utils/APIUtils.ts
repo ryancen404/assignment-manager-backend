@@ -1,4 +1,4 @@
-import { API } from '../../type';
+import { API } from '../controller/requestType';
 import { ParamError, ResultError } from '../other/customError';
 
 /**
@@ -21,7 +21,6 @@ const isNumber = (n: unknown): n is number => {
 export const isDate = (date: string): boolean => {
     return Boolean(Date.parse(date));
 };
-
 
 
 /**
