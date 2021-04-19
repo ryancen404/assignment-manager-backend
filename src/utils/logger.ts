@@ -9,7 +9,7 @@ const error = (...params: unknown[]) => {
 };
 
 const reqError = (...params: unknown[]) => {
-    error("[request] error", params);
+    error("[Request] error =>", params);
 };
 
 export default {

@@ -23,10 +23,10 @@ declare namespace Assignment {
 export declare namespace API {
     // 自定义请求结果
 
-    type statusCode = 0 | 1;
+    type Code = 0 | 1;
 
     export interface BaseResponse {
-        statusCode: statusCode,
+        code: Code,
         message?: string,
         content?: unknown,
     }

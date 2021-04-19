@@ -12,10 +12,11 @@ const unknownEndpoint = (_: Request, response: Response) => {
 };
 
 const requestLogger: RequestHandler = (request, _res, next) => {
-    logger.info('Method:', request.method);
+    logger.info('------------------[RequestLogger]---------------');
+    logger.info('Method: ', request.method);
     logger.info('Path:  ', request.path);
     logger.info('Body:  ', request.body);
-    logger.info('---');
+    logger.info('------------------[RequestLogger]---------------');
     next();
 };
 
@@ -23,22 +24,24 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
     logger.reqError(`cause by: ${error.message}`);
 
     if (error instanceof ResultError) {
+        // 服务端处理结果错误
         return response.status(500).json(createFailResponse("Server handle error!"));
     } else if (error instanceof ParamError) {
+        //请求参数错误
         return response.status(400).json(createFailResponse(error.message));
     }
 
-    if (error.name === 'CastError') {
-        return response.status(400).send({ error: 'malformatted id' });
-    } else if (error.name === 'ValidationError') {
-        return response.status(400).json({ error: 'validation error' });
-    } else if (error.name === 'JsonWebTokenError') {
-        return response.status(401).json({
-            error: 'invalid token'
-        });
-    }
+    // if (error.name === 'CastError') {
+    //     return response.status(400).send({ error: 'malformatted id' });
+    // } else if (error.name === 'ValidationError') {
+    //     return response.status(400).json({ error: 'validation error' });
+    // } else if (error.name === 'JsonWebTokenError') {
+    //     return response.status(401).json({
+    //         error: 'invalid token'
+    //     });
+    // }
     // logger.error(error.message);
-    response.status(500).json("unkown error");
+    response.status(500).json("Unkown Error");
     return next(error);
 };
 

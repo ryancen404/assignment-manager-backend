@@ -47,20 +47,20 @@ export const parseNumber = (n: unknown, name?: string): number => {
  */
 export const createSucessResponse = (object: unknown): API.BaseResponse => {
     return {
-        statusCode: 1,
+        code: 1,
         content: object
     };
 };
 
 export const createEmptySucessResponse = (): API.BaseResponse => {
     return {
-        statusCode: 1
+        code: 1
     };
 };
 
 export const createFailResponse = (message: string): API.BaseResponse => {
     return {
-        statusCode: 0,
+        code: 0,
         message
     };
 };

@@ -10,7 +10,7 @@ teacherRouter.post("/", async (req, res) => {
     const newTeacher = toNewTeacher(req.body);
     const result = await userService.createNewTeacher(newTeacher);
     checkResultCorrected(result);
-    res.status(400).json(createEmptySucessResponse());
+    res.status(200).json(createEmptySucessResponse());
 });
 
 /**
