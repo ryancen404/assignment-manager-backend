@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { User } from './requestType';
+import { User } from './request.type';
 import userService from '../services/teacherService';
-import { checkResultCorrected, createEmptySucessResponse, parseString } from '../utils/APIUtils';
+import { checkResultCorrected, createEmptySucessResponse, parseString } from './api.helper';
 
 const teacherRouter = Router();
 

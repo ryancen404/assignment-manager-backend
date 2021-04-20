@@ -95,6 +95,6 @@ teacherSchema.set('toJSON', {
     }
 });
 
-const Teacher = mongoose.model<TeacherDocument, TeacherModel>("Teacher", teacherSchema);
+const TeacherModel = mongoose.model<TeacherDocument, TeacherModel>("Teacher", teacherSchema);
 
-export default Teacher;
+export default TeacherModel;

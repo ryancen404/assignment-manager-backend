@@ -1,4 +1,4 @@
-import { API } from '../controller/requestType';
+import { API, User } from './request.type';
 import { ParamError, ResultError } from '../other/customError';
 
 /**
@@ -34,7 +34,7 @@ export const parseString = (text: unknown, name?: string): string => {
 };
 
 export const parseNumber = (n: unknown, name?: string): number => {
-    if(!n || !isNumber(n)) {
+    if (!n || !isNumber(n)) {
         throw new ParamError(`Incorrect or missing ${name}: ` + n);
     }
     return n;
@@ -63,4 +63,19 @@ export const createFailResponse = (message: string): API.BaseResponse => {
         code: 0,
         message
     };
+};
+
+// 约定的状态码
+export const StatusCode = {
+    success: 200,
+    serverError: 500,
+    paramsError: 400,
+    authenticatorError: 401
+};
+
+export const isUserType = (type: number): type is User.Type => {
+    if (type !== 1 && type !== 0) {
+        return false;
+    }
+    return true;
 };

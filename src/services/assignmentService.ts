@@ -1,12 +1,19 @@
+import { User } from "../controller/request.type";
+import StudentModel from "../model/student";
+import TeacherModel from "../model/teacher";
 
 /**
- * 通过教师端id获取所属的作业Preview列表
- * 其中的class filed不包含学生数组
- * @param tid 教师用户id
+ * 根据用户类型和id来找到作业数组
  * @returns 
  */
-const getAssignmentList = (_tid: string) => {
-    return [];
+const getAssignmentList = async (userType: User.Type, userId: string) => {
+    if (userType === 1) {
+        const teacherAssignments = await TeacherModel.findAssignments(userId);
+        return teacherAssignments.assignments;
+    } else {
+        const studentAssignments = await StudentModel.findMyAssignments(userId);
+        return studentAssignments.assignments;
+    }
 };
 
 /**
@@ -24,7 +31,7 @@ const getAssignmentDetail = (_assignId: string) => {
  * @returns is succeed add to db
  */
 const createNewAssignment = (): boolean => {
-    
+
     return true;
 };
 

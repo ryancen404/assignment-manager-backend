@@ -14,7 +14,7 @@ const StudentAssignmentSchema = new Schema({
         required: true,
         ref: "Assignment"
     },
-    status: {
+    assignmentStatus: {
         type: Boolean,
         required: true,
         default: false
@@ -33,12 +33,16 @@ const StudentAssignmentSchema = new Schema({
     { _id: false }
 );
 
-// 学生作业类型
+// 学生作业类型,是嵌套在Student Document里的子field
 export interface StudentAssignment {
     assignment: Types.ObjectId,
-    status: boolean,
+    assignmentStatus: boolean,
     corrected: boolean,
     score: number
+}
+
+export interface StudentAssignmentDocument extends StudentAssignment, AssignmentDocument {
+
 }
 
 const StudentSchema = new Schema<StudentDocument, StudentModel>({
@@ -71,16 +75,16 @@ export interface Student {
 
 export interface StudentDocument extends Student, Document {
     class: ClasssDocument["_id"],
-    teacher: Types.Array<TeacherDocument["_id"]>,
-    assignments: Types.Array<AssignmentDocument["_id"]>,
+    teacher?: Types.Array<TeacherDocument["_id"]>,
+    assignments?: Types.Array<StudentAssignment>,
 }
 
 export interface StudentPopulateTeacherDocument extends StudentDocument {
-    teacher: Types.Array<TeacherDocument>
+    teacher?: Types.Array<TeacherDocument>
 }
 
 export interface StudentPopulateAssignDocument extends StudentDocument {
-    assignments: Types.Array<AssignmentDocument>
+    assignments?: Types.Array<StudentAssignmentDocument>
 }
 
 export interface StudentModel extends Model<StudentDocument> {
@@ -111,4 +115,5 @@ StudentSchema.set('toJSON', {
     }
 });
 
-export default mongoose.model<StudentDocument, StudentModel>("Student", StudentSchema);
+const StudentModel = mongoose.model<StudentDocument, StudentModel>("Student", StudentSchema);
+export default StudentModel;

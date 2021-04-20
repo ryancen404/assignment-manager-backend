@@ -14,6 +14,13 @@ export class ResultError extends Error {
 export class ParamError extends Error {
     constructor(msg: string) {
         super(msg);
-        this.name = 'Param Error';
+        this.name = 'ParamError';
+    }
+}
+
+export class AuthorizationError extends Error {
+    constructor(msg: string) {
+        super(msg);
+        this.name = 'AuthorizationError';
     }
 }

@@ -3,8 +3,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { ParamError } from '../other/customError';
 import teacherService from '../services/teacherService';
-import { createSucessResponse, parseNumber, parseString } from '../utils/APIUtils';
-import { API, Login } from './requestType';
+import { createSucessResponse, parseNumber, parseString } from './api.helper';
+import { API, Login } from './request.type';
 import config from '../utils/config';
 
 const loginRouter = Router();

@@ -1,7 +1,7 @@
-import { User } from "../controller/requestType";
+import { User } from "../controller/request.type";
 import bcrypt from 'bcrypt';
 import config from "../utils/config";
-import TeacherModel, { Teacher, TeacherDocument } from "../model/teacher";
+import TeacherModel, { TeacherModel, TeacherDocument } from "../model/teacher";
 import logger from "../utils/logger";
 
 const TAG = "[TeacherService] => ";
