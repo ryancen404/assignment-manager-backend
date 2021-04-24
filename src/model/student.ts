@@ -54,7 +54,7 @@ const StudentSchema = new Schema<StudentDocument, StudentModel>({
         type: String,
         required: true,
     },
-    class: {
+    classId: {
         type: mongoose.Types.ObjectId,
         require: true,
     },
@@ -62,19 +62,24 @@ const StudentSchema = new Schema<StudentDocument, StudentModel>({
         type: mongoose.Types.ObjectId,
         ref: "Teacher"
     }],
+    grade: {
+        type: String,
+        required: true,
+    },
     assignments: [StudentAssignmentSchema]
 });
 
 export interface Student {
     studentNumber: string,
     studentName: string,
-    class: Types.ObjectId,
+    grade: string,
+    classId: Types.ObjectId,
     teacher?: Array<Types.ObjectId>,
     assignments?: Array<StudentAssignment>
 }
 
 export interface StudentDocument extends Student, Document {
-    class: ClasssDocument["_id"],
+    classId: ClasssDocument["_id"],
     teacher?: Types.Array<TeacherDocument["_id"]>,
     assignments?: Types.Array<StudentAssignment>,
 }

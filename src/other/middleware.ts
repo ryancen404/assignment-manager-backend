@@ -5,6 +5,7 @@ import { createFailResponse, StatusCode } from '../controller/api.helper';
 import logger from '../utils/logger';
 import { AuthorizationError, ParamError, ResultError } from './customError';
 import config from '../utils/config';
+import ControllerConfig from '../controller/config.controller';
 
 /**
  * 未知请求时处理的中间件
@@ -36,7 +37,7 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
         // token校验失败统一返回
         return response.status(StatusCode.authenticatorError).json(createFailResponse(error.message));
     }
-    response.status(StatusCode.serverError).json("Unkown Error!");
+    response.status(StatusCode.serverError).json(createFailResponse("unkown Error!"));
     return next(error);
 };
 
@@ -45,24 +46,26 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   */
 const tokenHandler: RequestHandler = (request, _, next) => {
     const routerPath = request.path.toString();
-    // 过滤登陆和注册请求
-    if (routerPath.indexOf('login') === -1 && routerPath.indexOf('signup') === -1) {
+    // 是否在不检查Token的path中
+    const paths = ControllerConfig.getNoTokenCheckPaths();
+    const result = paths.find(p => routerPath.indexOf(p) !== -1);
+    if (!result) {
         const token = request.get('Authorization');
         if (token !== undefined) {
             try {
                 const decodeUserToken = jwt.verify(token, config.TOKEN_SECRET);
                 if (isUserToken(decodeUserToken)) {
                     // 注意不要覆盖
-                    request.params["account"] = decodeUserToken.account;
-                    request.params["userId"] = decodeUserToken.id;
-                    request.params["userType"] = decodeUserToken.type.toString();
+                    request.body.account = decodeUserToken.account;
+                    request.body.userId = decodeUserToken.id;
+                    request.body.userType = decodeUserToken.type;
                 }
             } catch (error) {
                 logger.reqError("token check error, maybe is JsonWebTokenError. Detail:", error);
-                throw new AuthorizationError("token missing or invalid");
+                throw new AuthorizationError("token missing or invalid!");
             }
         } else {
-            throw new AuthorizationError("token missing or invalid");
+            throw new AuthorizationError("token missing or invalid!");
         }
     }
     return next();

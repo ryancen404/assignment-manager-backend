@@ -13,7 +13,7 @@ const ClasssSchema = new Schema<ClasssDocument, ClasssModel>({
         required: true,
     },
     students: [{
-        type: Types.ObjectId,
+        type: mongoose.Types.ObjectId,
         ref: "Student"
     }]
 });
@@ -52,4 +52,5 @@ ClasssSchema.set('toJSON', {
     }
 });
 
-export default mongoose.model<ClasssDocument, ClasssModel>("Classs", ClasssSchema);
+const ClassModel = mongoose.model<ClasssDocument, ClasssModel>("Classs", ClasssSchema);
+export default ClassModel;

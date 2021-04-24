@@ -8,6 +8,8 @@ import middleware from './other/middleware';
 import config from './utils/config';
 import logger from './utils/logger';
 import loginRouter from './controller/login';
+import studentRouter from './controller/students';
+import fileRouter from './controller/files';
 
 const app = express();
 
@@ -34,12 +36,15 @@ app.use(express.json());
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 app.use(cors());
 app.use(middleware.requestLogger);
+app.use(middleware.tokenHandler);
 
 // config router middleware
 app.use('/api/login', loginRouter);
 app.use('/api/assignment', assignmentRouter);
 app.use('/api/class', classRouter);
 app.use('/api/user/teacher', teacherRouter);
+app.use('/api/user/student', studentRouter);
+app.use('/api/files', fileRouter)
 
 app.get('/ping', (_req, res) => {
   console.log('someone pinged here');

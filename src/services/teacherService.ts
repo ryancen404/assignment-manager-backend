@@ -1,7 +1,7 @@
 import { User } from "../controller/request.type";
 import bcrypt from 'bcrypt';
 import config from "../utils/config";
-import TeacherModel, { TeacherModel, TeacherDocument } from "../model/teacher";
+import TeacherModel, { Teacher, TeacherDocument } from "../model/teacher";
 import logger from "../utils/logger";
 
 const TAG = "[TeacherService] => ";
@@ -24,9 +24,8 @@ const createNewTeacher = async (newTeacher: User.NewTeacher): Promise<boolean> =
             passwordHash: passwordHash,
             college: newTeacher.college,
         };
-        // const savedTeacher = await TeacherModel.create(teacher);
-        // logger.info(TAG, "save Teacher success, the id is:", savedTeacher._id);
-        logger.info(teacher);
+        const savedTeacher = await TeacherModel.create(teacher);
+        logger.info(TAG, "save Teacher success, the id is:", savedTeacher._id);
     } catch (error) {
         console.log(error);
         return false;

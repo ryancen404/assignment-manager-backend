@@ -7,7 +7,7 @@ import TeacherModel from "../model/teacher";
  * @returns 
  */
 const getAssignmentList = async (userType: User.Type, userId: string) => {
-    if (userType === 1) {
+    if (userType === 0) {
         const teacherAssignments = await TeacherModel.findAssignments(userId);
         return teacherAssignments.assignments;
     } else {
@@ -31,7 +31,9 @@ const getAssignmentDetail = (_assignId: string) => {
  * @returns is succeed add to db
  */
 const createNewAssignment = (): boolean => {
-
+    // const newAssignment: Assignment = {
+    //     teacher: 
+    // }
     return true;
 };
 

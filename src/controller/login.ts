@@ -6,15 +6,17 @@ import teacherService from '../services/teacherService';
 import { createSucessResponse, parseNumber, parseString } from './api.helper';
 import { API, Login } from './request.type';
 import config from '../utils/config';
+import ControllerConfig from './config.controller';
 
 const loginRouter = Router();
+ControllerConfig.addPathToNoTokenChecks("login");
 
 /**
  * 处理过程中直接抛出异常会被errorHandle中间件统一处理
  */
 loginRouter.post("/", async (req, res) => {
   const loginParams = toLoginParams(req.body);
-  if (loginParams.type == 1) {
+  if (loginParams.type == 0) {
     const teacher = await teacherService.getTeacherByAccount(loginParams.account);
     if (teacher == null) {
       throw new ParamError("账号不存在!");
@@ -48,7 +50,7 @@ const toLoginParams = ({ account, password, type }: LoginField): Login.User => {
 };
 
 const parseLoginType = (type: unknown) => {
-  const n = parseNumber(type);
+  const n = parseNumber(type, "type");
   if (n !== 0 && n !== 1) {
     throw new ParamError("login params type is malformatted");
   }

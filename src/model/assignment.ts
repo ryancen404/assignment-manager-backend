@@ -30,7 +30,10 @@ const assignmentSchema = new Schema<AssignmentDocument, AssignmentModel>({
         type: mongoose.Types.ObjectId,
         ref: "Classs"
     }],
-    status: String,
+    status: {
+        type: String,
+        default: "未开始"
+    },
     corrected: {
         type: Boolean,
         reuired: true,
@@ -42,15 +45,26 @@ const assignmentSchema = new Schema<AssignmentDocument, AssignmentModel>({
     }]
 });
 
+export type AssignmentStatus = "未开始" | "进行中" | "已结束";
+
 export interface Assignment {
+    // 关联的教师id
     teacher: Types.ObjectId,
+    // 作业名字
     assignName: string,
+    // 描述
     desc?: string,
+    // 开始日期
     startTime: Date,
+    // 结束日期
     endTime: Date,
+    // 关联的班级数组
     class: Array<Types.ObjectId>,
-    status?: string,
+    // 作业的状态
+    status?: AssignmentStatus,
+    // 是否已经批改
     corrected: boolean,
+    // 关联的文件信息
     files?: Array<Types.ObjectId>
 }
 
@@ -106,4 +120,5 @@ assignmentSchema.set('toJSON', {
     }
 });
 
-export default mongoose.model<AssignmentDocument, AssignmentModel>("Assignment", assignmentSchema);
+const AssignmentModel = mongoose.model<AssignmentDocument, AssignmentModel>("Assignment", assignmentSchema);
+export default AssignmentModel;

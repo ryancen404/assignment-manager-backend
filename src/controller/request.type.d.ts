@@ -1,3 +1,6 @@
+import { Assignment } from "../model/assignment";
+import { Classs } from "../model/classs";
+import { Student } from "../model/student";
 import { Teacher } from "../model/teacher";
 
 // 请求体对象类型
@@ -18,7 +21,32 @@ declare namespace Login {
 }
 
 declare namespace Assignment {
+    export type NewAssignment = Omit<Assignment, "">;
+}
 
+declare namespace Class {
+
+    export interface ResBaseClass extends Classs {
+        classId: string,
+        // students objectids
+        students: Array<string>
+    }
+
+    export interface ResBrowseClass extends ResBaseClass {
+        students: Array<Omit<Student.ResBaseStudent, "teacher">>,
+    }
+
+}
+
+declare namespace Student {
+    // 返回的Student类型
+    export interface ResBaseStudent extends Student {
+        sid: string,
+        // class的ObjectId
+        classId: string,
+        // teacher objectIds 
+        teacher?: Array<string>,
+    }
 }
 
 

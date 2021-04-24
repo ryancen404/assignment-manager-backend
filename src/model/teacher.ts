@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
 import { AssignmentDocument } from "./assignment";
-import { ClasssDocument } from "./classs";
+import { ClassPopulateDocument, ClasssDocument } from "./classs";
 
 // 参考自https://medium.com/@agentwhs/complete-guide-for-typescript-for-mongoose-for-node-js-8cc0a7e470c1
 /**
@@ -27,7 +27,7 @@ export interface TeacherDocument extends Teacher, Document {
 }
 
 export interface TeacherPopulateDocument extends TeacherDocument {
-    class?: Types.Array<ClasssDocument>,
+    class?: Types.Array<ClassPopulateDocument>,
     assignments?: Types.Array<AssignmentDocument>,
 }
 
@@ -70,7 +70,7 @@ teacherSchema.statics.findClass = async function (
     this: Model<TeacherDocument>,
     id: string
 ) {
-    return this.findById(id).populate("class").exec();
+    return this.findById(id).populate("class").populate("students").exec();
 };
 
 teacherSchema.statics.findAssignments = async function (

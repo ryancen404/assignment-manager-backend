@@ -34,7 +34,7 @@ export const parseString = (text: unknown, name?: string): string => {
 };
 
 export const parseNumber = (n: unknown, name?: string): number => {
-    if (!n || !isNumber(n)) {
+    if (n === undefined ||  n === null || !isNumber(n)) {
         throw new ParamError(`Incorrect or missing ${name}: ` + n);
     }
     return n;

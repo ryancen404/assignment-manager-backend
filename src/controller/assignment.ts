@@ -11,12 +11,14 @@ const assignmentRouter = Router();
 assignmentRouter.get("/", async (req, res) => {
     // 对于Token中间件解出来的参数完全信任不做检验
     // 用户类型 0 1
-    const userType = parseInt(req.params["userType"]);
+    const userType = req.body.userType;
     if (!isUserType(userType)) {
-        throw new AuthorizationError("token maybe is error!");
+        throw new AuthorizationError("token missing or invalid!");
     }
-    const userId = req.params["userId"];
+    // const userId = req.params["userId"];
+    const userId = req.body.userId;
     const assignmentList = await assignmentService.getAssignmentList(userType, userId);
+
     if (assignmentList) {
         res.send(assignmentList);
     } else {
@@ -36,9 +38,11 @@ assignmentRouter.get("/:assignId", (req, res) => {
 /**
  * c
  */
-// assignmentRouter.post("/", (_req, res) => {
-    // const result = assignmentService.createNewAssignment();
-// });
+assignmentRouter.post("/", (_req, _res) => {
+    // const userId = req.body.userId;
+
+    // const result = assignmentService.createNewAssignment(userId, );
+});
 
 
 export default assignmentRouter;
