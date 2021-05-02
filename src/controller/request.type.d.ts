@@ -41,7 +41,7 @@ declare namespace Class {
 declare namespace Student {
     // 返回的Student类型
     export interface ResBaseStudent extends Student {
-        sid: string,
+        sId: string,
         // class的ObjectId
         classId: string,
         // teacher objectIds 

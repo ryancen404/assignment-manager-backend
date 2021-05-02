@@ -25,7 +25,7 @@ const toResBrowseClass = (classs: Types.Array<ClassPopulateDocument>) => {
   const result = classs.map((clazz) => {
     const students = clazz.students.map(student => {
       const resStudent: Student.ResBaseStudent = {
-        sid: student.id,
+        sId: student.id,
         studentName: student.studentName,
         studentNumber: student.studentNumber,
         grade: student.grade,
@@ -59,7 +59,7 @@ const deleteClassStudent = async (classId: string, sId: string) => {
   if (!student) {
     return false;
   }
-  const result2 = await student.updateOne({ classId: "" }).exec();
+  const result2 = await student.updateOne({ classId: null }).exec();
   if (!result2 || result2.ok !== 1) {
     return false;
   }
