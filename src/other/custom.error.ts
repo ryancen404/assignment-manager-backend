@@ -24,3 +24,10 @@ export class AuthorizationError extends Error {
         this.name = 'AuthorizationError';
     }
 }
+
+export class ImportError extends Error {
+    constructor(msg: string) {
+        super(msg)
+        this.name = "ImportError"
+    }
+}

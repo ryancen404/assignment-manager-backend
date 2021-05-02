@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
-import { AssignmentDocument } from "./assignment";
-import { ClassPopulateDocument, ClasssDocument } from "./classs";
+import { AssignmentDocument } from "./assignment.model";
+import { ClassPopulateDocument, ClasssDocument } from "./classs.model";
 
 // 参考自https://medium.com/@agentwhs/complete-guide-for-typescript-for-mongoose-for-node-js-8cc0a7e470c1
 /**
@@ -22,12 +22,12 @@ export interface Teacher {
  * 存储的文档类型, 可以用来实现查询
  */
 export interface TeacherDocument extends Teacher, Document {
-    class?: Types.Array<ClasssDocument["_id"]>,
+    class: Types.Array<ClasssDocument["_id"]>,
     assignments?: Types.Array<AssignmentDocument["_id"]>,
 }
 
 export interface TeacherPopulateDocument extends TeacherDocument {
-    class?: Types.Array<ClassPopulateDocument>,
+    class: Types.Array<ClassPopulateDocument>,
     assignments?: Types.Array<AssignmentDocument>,
 }
 
@@ -57,7 +57,7 @@ const teacherSchema = new Schema<TeacherDocument, TeacherModel>({
     },
     class: [{
         type: mongoose.Types.ObjectId,
-        ref: "Classs"
+        ref: "Classs",
     }],
     assignments: [{
         type: mongoose.Types.ObjectId,
@@ -70,7 +70,7 @@ teacherSchema.statics.findClass = async function (
     this: Model<TeacherDocument>,
     id: string
 ) {
-    return this.findById(id).populate("class").populate("students").exec();
+    return this.findById(id).populate("class").exec();
 };
 
 teacherSchema.statics.findAssignments = async function (

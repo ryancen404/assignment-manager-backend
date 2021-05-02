@@ -1,3 +1,4 @@
+// 不受Token校验的路由
 let noTokenCheckRouterPaths: string[] = [];
 
 const addPathToNoTokenChecks = (path: string) => {
@@ -10,10 +11,10 @@ const removeNoTokenChecks = (path: string) => {
 
 const getNoTokenCheckPaths = () => noTokenCheckRouterPaths
 
-const ControllerConfig = {
+const RouterConfig = {
   addPathToNoTokenChecks,
   removeNoTokenChecks,
   getNoTokenCheckPaths
 }
 
-export default ControllerConfig;
+export default RouterConfig;

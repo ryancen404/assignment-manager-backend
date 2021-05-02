@@ -1,15 +1,15 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { ParamError } from '../other/customError';
-import teacherService from '../services/teacherService';
-import { createSucessResponse, parseNumber, parseString } from './api.helper';
+import { ParamError } from '../other/custom.error';
+import teacherService from '../services/teacher.service';
+import { createSucessResponse, parseNumber, parseString } from '../other/api.helper';
 import { API, Login } from './request.type';
-import config from '../utils/config';
-import ControllerConfig from './config.controller';
+import config from '../config/env.config';
+import RouterConfig from '../config/router.config';
 
 const loginRouter = Router();
-ControllerConfig.addPathToNoTokenChecks("login");
+RouterConfig.addPathToNoTokenChecks("login");
 
 /**
  * 处理过程中直接抛出异常会被errorHandle中间件统一处理

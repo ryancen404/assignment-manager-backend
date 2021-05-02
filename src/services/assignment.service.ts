@@ -1,6 +1,6 @@
 import { User } from "../controller/request.type";
-import StudentModel from "../model/student";
-import TeacherModel from "../model/teacher";
+import StudentModel from "../model/student.model";
+import TeacherModel from "../model/teacher.model";
 
 /**
  * 根据用户类型和id来找到作业数组

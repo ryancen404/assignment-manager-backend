@@ -1,0 +1,9 @@
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50IjoiMjAxNzIxMzI3NkBzdHUuY3F1cHQuY29tIiwiaWQiOiI2MDdjNjU4NDYwODdhYTUwMTdkZjAxNTIiLCJ0eXBlIjowLCJpYXQiOjE2MTkyNTIyNjZ9.PfPZOlqfEoN5WnZpr1NZd4V7o1o5nvxx1ytrufSOEkI
+POST http://localhost:3001/api/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "account": "2017213276@stu.cqupt.com",
+  "password": "1234",
+  "type": 0
+}

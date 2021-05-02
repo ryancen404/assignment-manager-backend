@@ -1,7 +1,7 @@
-import { Assignment } from "../model/assignment";
-import { Classs } from "../model/classs";
-import { Student } from "../model/student";
-import { Teacher } from "../model/teacher";
+import { Assignment } from "../model/assignment.model";
+import { Classs } from "../model/classs.model";
+import { Student } from "../model/student.model";
+import { Teacher } from "../model/teacher.model";
 
 // 请求体对象类型
 declare namespace User {

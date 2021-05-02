@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import mongoose, { Document, Model, Schema, Types } from 'mongoose';
-import { AssignmentFileDocument } from './assignmentFile';
-import { ClasssDocument } from './classs';
-import { TeacherDocument } from './teacher';
+import { AssignmentFileDocument } from './assignmentFile.model';
+import { ClasssDocument } from './classs.model';
+import { TeacherDocument } from './teacher.model';
 
 const assignmentSchema = new Schema<AssignmentDocument, AssignmentModel>({
     teacher: {

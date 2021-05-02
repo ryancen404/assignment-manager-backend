@@ -1,0 +1,4 @@
+# 获取所有Assignment
+GET  http://localhost:3001/api/assignment HTTP/1.1
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50IjoiMjAxNzIxMzI3NkBzdHUuY3F1cHQuY29tIiwiaWQiOiI2MDdjNjU4NDYwODdhYTUwMTdkZjAxNTIiLCJ0eXBlIjowLCJpYXQiOjE2MTkyNTIyNjZ9.PfPZOlqfEoN5WnZpr1NZd4V7o1o5nvxx1ytrufSOEkI
+# Content-Type: multipart/form-data

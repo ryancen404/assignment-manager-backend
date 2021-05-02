@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { ParamError } from '../other/customError';
-import classService from '../services/classService';
-import { createEmptySucessResponse, createFailResponse, createSucessResponse } from './api.helper';
+import { ParamError } from '../other/custom.error';
+import classService from '../services/class.service';
+import { createEmptySucessResponse, createFailResponse, createSucessResponse } from '../other/api.helper';
 
 const classRouter = Router();
 

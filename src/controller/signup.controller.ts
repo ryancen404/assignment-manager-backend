@@ -1,8 +1,8 @@
 import { Router } from "express";
-import ControllerConfig from "./config.controller";
+import RouterConfig from "../config/router.config";
 
 const signupRouter = Router();
-ControllerConfig.addPathToNoTokenChecks("signup");
+RouterConfig.addPathToNoTokenChecks("signup");
 
 signupRouter.post("/", async (req, res) => {
 

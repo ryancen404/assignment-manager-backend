@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import mongoose, { Model, Schema, Types, Document } from "mongoose";
-import { AssignmentDocument } from "./assignment";
-import { ClasssDocument } from "./classs";
-import { TeacherDocument } from "./teacher";
+import { AssignmentDocument } from "./assignment.model";
+import { ClasssDocument } from "./classs.model";
+import { TeacherDocument } from "./teacher.model";
 
 /**
  * 对于每个assignment对象需要追加：是否已经完、是否已经批改和分数属性
@@ -74,18 +74,18 @@ export interface Student {
     studentName: string,
     grade: string,
     classId: Types.ObjectId,
-    teacher?: Array<Types.ObjectId>,
+    teachers?: Array<Types.ObjectId>,
     assignments?: Array<StudentAssignment>
 }
 
 export interface StudentDocument extends Student, Document {
     classId: ClasssDocument["_id"],
-    teacher?: Types.Array<TeacherDocument["_id"]>,
+    teachers: Types.Array<TeacherDocument["_id"]>,
     assignments?: Types.Array<StudentAssignment>,
 }
 
 export interface StudentPopulateTeacherDocument extends StudentDocument {
-    teacher?: Types.Array<TeacherDocument>
+    teachers: Types.Array<TeacherDocument>
 }
 
 export interface StudentPopulateAssignDocument extends StudentDocument {

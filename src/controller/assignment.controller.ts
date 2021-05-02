@@ -1,7 +1,7 @@
 import {Router} from 'express';
-import { AuthorizationError } from '../other/customError';
-import assignmentService from "../services/assignmentService";
-import { isUserType } from './api.helper';
+import { AuthorizationError } from '../other/custom.error';
+import assignmentService from "../services/assignment.service";
+import { isUserType } from '../other/api.helper';
 
 const assignmentRouter = Router();
 

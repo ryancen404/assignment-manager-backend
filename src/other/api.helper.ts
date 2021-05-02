@@ -1,5 +1,5 @@
-import { API, User } from './request.type';
-import { ParamError, ResultError } from '../other/customError';
+import { API, User } from '../controller/request.type';
+import { ParamError, ResultError } from './custom.error';
 
 /**
  * 用于判断请求处理结果是否正确

@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import dotenv from "dotenv";
+
 // load .env file
 dotenv.config();
 
+/**
+ * 环境变量配置
+ */
 const APP_PORT = process.env.APP_PORT!;
 const USER_NAME = process.env.USER_NAME!;
 const PASSWORD = process.env.PASSWORD!;
@@ -14,7 +18,7 @@ if (process.env.NODE_ENV === 'test') {
     MONGODB_URL = process.env.MONGODB_URL_LOCAL!;
 }
 
-export default {
+const EnvConfig = {
     APP_PORT,
     MONGODB_URL,
     USER_NAME,
@@ -22,3 +26,4 @@ export default {
     USER_PWD_SALT,
     TOKEN_SECRET
 };
+export default EnvConfig;

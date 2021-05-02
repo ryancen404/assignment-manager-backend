@@ -1,17 +1,15 @@
 import { User } from "../controller/request.type";
 import bcrypt from 'bcrypt';
-import config from "../utils/config";
-import TeacherModel, { Teacher, TeacherDocument } from "../model/teacher";
-import logger from "../utils/logger";
-
-const TAG = "[TeacherService] => ";
+import config from "../config/env.config";
+import TeacherModel, { Teacher, TeacherDocument } from "../model/teacher.model";
+import ServiceConfig from "../config/service.config";
 
 // 创建新的教师用户
 const createNewTeacher = async (newTeacher: User.NewTeacher): Promise<boolean> => {
     // 先查找是否已经存在这个账户
     const targetTeacher = await TeacherModel.findOne({ account: newTeacher.account });
     if (targetTeacher !== null) {
-        logger.error(TAG, "newTeacher is existence");
+        ServiceConfig.logger("newTeacher is existence");
         return false;
     }
     // 对密码进行hash
@@ -25,9 +23,9 @@ const createNewTeacher = async (newTeacher: User.NewTeacher): Promise<boolean> =
             college: newTeacher.college,
         };
         const savedTeacher = await TeacherModel.create(teacher);
-        logger.info(TAG, "save Teacher success, the id is:", savedTeacher._id);
+        ServiceConfig.logger("save Teacher success, the id is:", savedTeacher._id);
     } catch (error) {
-        console.log(error);
+        ServiceConfig.logger(error);
         return false;
     }
     return true;
