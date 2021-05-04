@@ -21,7 +21,21 @@ declare namespace Login {
 }
 
 declare namespace Assignment {
-    export type NewAssignment = Omit<Assignment, "">;
+    export interface reqNewAssignment {
+        name: string,
+        desc?: string,
+        classIds: string[],
+        startTime: number,
+        endTime: number,
+        filesName?: string[]
+    }
+
+    export interface ResEasyAssignment extends Omit<Assignment, "class" | "files"> {
+        assignId: string,
+        startTime: string,
+        endTime: string,
+        classs: Class.ResBaseClass[]
+    }
 }
 
 declare namespace Class {
@@ -29,7 +43,7 @@ declare namespace Class {
     export interface ResBaseClass extends Classs {
         classId: string,
         // students objectids
-        students: Array<string>
+        students?: Array<string>
     }
 
     export interface ResBrowseClass extends ResBaseClass {

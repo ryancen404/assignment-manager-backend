@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
 import ClassModel, { Classs, ClasssDocument } from '../model/classs.model';
 import { parseString } from '../other/api.helper';
 import TeacherModel from '../model/teacher.model';
+import { getRandomInt } from '../utils/service.utils';
 
 /**
  * 解析xlsx录入到DB
@@ -60,9 +61,66 @@ const handleStudentImport = async (userId: string, file: Express.Multer.File) =>
   return true;
 }
 
+/**
+ * 把上传的附件的服务端附件名返回给客户端
+ **/
+const moveAttachment = async (userId: string, file: Express.Multer.File) => {
+  let filename = "";
+  try {
+    const originalPath = file.path;
+    const extName = path.extname(file.originalname);
+    const originalFileName = file.originalname.replace(extName, "");
+    const fileReader = fs.createReadStream(originalPath);
+    const outputDir = `./.data/temp/attachment/${userId}`
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    filename = `${originalFileName}_${getRandomInt(100)}${extName}`
+    const fileOutputPath = `${outputDir}/${filename}`
+    const fileWriter = fs.createWriteStream(fileOutputPath);
+    fileReader.pipe(fileWriter);
+    // 删除源文件
+    fs.unlinkSync(originalPath);
+  } catch (error) {
+    ServiceConfig.logger("move temp attachment error:", error);
+    return null;
+  }
+  return filename;
+}
+
+/**
+ * 把临时附件移动到自己的目录下
+ */
+const moveAssignmentAttach = async (userId: string, fileNames?: string[]) => {
+  if (fileNames === undefined || fileNames.length === 0) {
+    return true;
+  }
+  try {
+    fileNames.forEach(name => {
+      const originalPath = `.data/temp/attachment/${userId}/${name}`;
+      const fileReader = fs.createReadStream(originalPath);
+      const outputDir = `./.data/assignment/${userId}`
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+      const fileOutputPath = `${outputDir}/${name}`
+      const fileWriter = fs.createWriteStream(fileOutputPath);
+      fileReader.pipe(fileWriter);
+      // 删除源文件
+      fs.unlinkSync(originalPath);
+    })
+  } catch (error) {
+    ServiceConfig.logger("move attachment to myslef error:", error);
+    return false;
+  }
+  return true;
+}
+
 
 const FilesService = {
-  handleStudentImport
+  handleStudentImport,
+  moveAttachment,
+  moveAssignmentAttach
 }
 
 export default FilesService;

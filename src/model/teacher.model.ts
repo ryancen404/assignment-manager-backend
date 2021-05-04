@@ -23,12 +23,12 @@ export interface Teacher {
  */
 export interface TeacherDocument extends Teacher, Document {
     class: Types.Array<ClasssDocument["_id"]>,
-    assignments?: Types.Array<AssignmentDocument["_id"]>,
+    assignments: Types.Array<AssignmentDocument["_id"]>,
 }
 
 export interface TeacherPopulateDocument extends TeacherDocument {
     class: Types.Array<ClassPopulateDocument>,
-    assignments?: Types.Array<AssignmentDocument>,
+    assignments: Types.Array<AssignmentDocument>,
 }
 
 export interface TeacherModel extends Model<TeacherDocument> {

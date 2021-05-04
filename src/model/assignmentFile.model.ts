@@ -5,7 +5,7 @@ import { Document, model, Model, Schema } from 'mongoose';
 export interface AssignmentFile {
     name: string,
     link: string,
-    md: string,
+    md5?: string,
     length: number
 }
 
@@ -37,4 +37,5 @@ assignmentFileSchema.set('toJSON', {
     }
 });
 
-export default model<AssignmentFileDocument, AssignmentFileModel>("AssignmentFile", assignmentFileSchema);
+const AssignmentFileModel = model<AssignmentFileDocument, AssignmentFileModel>("AssignmentFile", assignmentFileSchema);
+export default AssignmentFileModel;

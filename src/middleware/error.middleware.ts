@@ -4,7 +4,7 @@ import { createFailResponse, StatusCode } from "../other/api.helper";
 import { AuthorizationError, ParamError, ResultError } from "../other/custom.error";
 
 const errorHandler: ErrorRequestHandler = (error, _request, response, next) => {
-  MiddlewareConfig.logger(`cause by: ${error.message}`);
+  MiddlewareConfig.logger(`cause by: ${error}`);
 
   if (error instanceof ResultError) {
     // 服务端处理结果错误

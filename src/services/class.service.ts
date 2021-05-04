@@ -20,6 +20,28 @@ const getTeacherClass = async (tid: string) => {
   return result;
 };
 
+const getTeacherBaseClass = async (tid: string) => {
+  const teacherWithClass = await TeacherModel.findClass(tid);
+  ServiceConfig.logger("teacherWithClass: ", teacherWithClass);
+  let result: Class.ResBaseClass[] = [];
+  if (teacherWithClass.class !== undefined) {
+    result = toResBaseClass(teacherWithClass.class);
+  }
+  return result;
+}
+
+const toResBaseClass = (classes: Types.Array<ClassPopulateDocument>) => {
+  const result = classes.map(clazz => {
+    const baseClass: Class.ResBaseClass = {
+      classId: clazz.id,
+      classNumber: clazz.classNumber,
+      className: clazz.className,
+    }
+    return baseClass
+  })
+  return result;
+}
+
 // 转换成浏览页面需要的数据结构
 const toResBrowseClass = (classs: Types.Array<ClassPopulateDocument>) => {
   const result = classs.map((clazz) => {
@@ -69,7 +91,8 @@ const deleteClassStudent = async (classId: string, sId: string) => {
 
 const classService = {
   getTeacherClass,
-  deleteClassStudent
+  deleteClassStudent,
+  getTeacherBaseClass
 };
 
 export default classService;

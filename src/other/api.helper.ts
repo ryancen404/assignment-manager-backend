@@ -33,6 +33,13 @@ export const parseString = (text: unknown, name?: string): string => {
     return text;
 };
 
+export const paraseArray = (array: unknown, name?: string): any[] => {
+    if (!(array instanceof Array)) {
+        throw new ParamError(`Incorrect or missing ${name}: ` + array);
+    }
+    return array;
+}
+
 export const parseNumber = (n: unknown, name?: string): number => {
     if (n === undefined ||  n === null || !isNumber(n)) {
         throw new ParamError(`Incorrect or missing ${name}: ` + n);

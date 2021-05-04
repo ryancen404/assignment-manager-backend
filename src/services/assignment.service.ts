@@ -1,6 +1,12 @@
-import { User } from "../controller/request.type";
+import { Assignment, Class, User } from "../controller/request.type";
+import AssignmentModel, { Assignment as AssignmentDB } from '../model/assignment.model';
+import fs from 'fs';
+import AssignmentFileModel, { AssignmentFile } from "../model/assignmentFile.model";
 import StudentModel from "../model/student.model";
-import TeacherModel from "../model/teacher.model";
+import TeacherModel, { TeacherDocument, TeacherPopulateDocument } from "../model/teacher.model";
+import { Types } from "mongoose";
+import ServiceConfig from "../config/service.config";
+import { ParamError } from "../other/custom.error";
 
 /**
  * 根据用户类型和id来找到作业数组
@@ -8,13 +14,43 @@ import TeacherModel from "../model/teacher.model";
  */
 const getAssignmentList = async (userType: User.Type, userId: string) => {
     if (userType === 0) {
-        const teacherAssignments = await TeacherModel.findAssignments(userId);
-        return teacherAssignments.assignments;
+        const myself = await TeacherModel.findById(userId);
+        if (myself === null) {
+            throw new ParamError("use error!");
+        }
+        const assignmentList = await toResEasyAssignment(myself);
+        return assignmentList;
     } else {
         const studentAssignments = await StudentModel.findMyAssignments(userId);
         return studentAssignments.assignments;
     }
 };
+
+const toResEasyAssignment = async (teacher: TeacherDocument) => {
+    const result = await Promise.all(teacher.assignments.map(async assignId => {
+        const assignment = await AssignmentModel.findClass(assignId);
+        const classes: Class.ResBaseClass[] = assignment.class.map(clazz => {
+            const resClazz: Class.ResBaseClass = {
+                classId: clazz.id,
+                className: clazz.className,
+                classNumber: clazz.classNumber
+            }
+            return resClazz;
+        })
+        const resAssignment: Assignment.ResEasyAssignment = {
+            assignId,
+            assignName: assignment.assignName,
+            startTime: assignment.startTime.toLocaleDateString(),
+            endTime: assignment.endTime.toLocaleDateString(),
+            corrected: assignment.corrected,
+            status: assignment.status,
+            teacher: teacher.id,
+            classs: classes
+        }
+        return resAssignment;
+    }));
+    return result;
+}
 
 /**
  * 根据assignId返回完整的作业详情信息
@@ -27,14 +63,46 @@ const getAssignmentDetail = (_assignId: string) => {
 
 /**
  * create new Assignment
- * 
- * @returns is succeed add to db
  */
-const createNewAssignment = (): boolean => {
-    // const newAssignment: Assignment = {
-    //     teacher: 
-    // }
-    return true;
+const createNewAssignment = async (userId: string, assignment: Assignment.reqNewAssignment) => {
+    try {
+        const myself = await TeacherModel.findById(userId);
+        if (myself === null) {
+            throw new ParamError("user is error!")
+        }
+        let fileIds = []
+        if (assignment.filesName !== undefined) {
+            // 将附件信息存储到db
+            fileIds = await Promise.all(assignment.filesName.map(async (name) => {
+                const path = `./.data/assignment/${userId}/${name}`;
+                const file: AssignmentFile = {
+                    name,
+                    link: path,
+                    length: fs.statSync(path).size
+                }
+                const savedFile = await AssignmentFileModel.create(file);
+                return savedFile._id;
+            }));
+        }
+        const classObjectIds = assignment.classIds.map(id => new Types.ObjectId(id));
+        const newAssignment: AssignmentDB = {
+            teacher: myself._id,
+            assignName: assignment.name,
+            startTime: new Date(assignment.startTime),
+            endTime: new Date(assignment.endTime),
+            class: classObjectIds,
+            corrected: false,
+            files: fileIds
+        }
+        const savedAssign = await AssignmentModel.create(newAssignment);
+        myself.assignments.addToSet(savedAssign._id);
+        const result = await myself.updateOne({ assignments: myself.assignments }).exec();
+        ServiceConfig.logger("createNewAssignment success! id=", savedAssign.id);
+        return savedAssign._id !== undefined && result.ok === 1;
+    } catch (error) {
+        ServiceConfig.logger("createNewAssignment error:", error);
+        return false;
+    }
 };
 
 /**

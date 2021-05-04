@@ -16,6 +16,15 @@ classRouter.get("/all", async (req, res) => {
   res.status(200).json(createSucessResponse(myClass));
 });
 
+classRouter.get("/easy", async (req, res) => {
+  const userId = req.body.userId;
+  const userType = req.body.userType;
+  if (userType != 0) {
+    throw new ParamError("only teacher user can get all classs");
+  }
+  const myBaseClass = await classService.getTeacherBaseClass(userId);
+  res.status(200).json(createSucessResponse(myBaseClass));
+})
 
 classRouter.post("/:classId", async (req, res) => {
   const result = await classService.deleteClassStudent(req.params.classId, req.body.sId);

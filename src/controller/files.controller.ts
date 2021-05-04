@@ -9,19 +9,22 @@ import EnvConfig from "../config/env.config";
 import { API } from "./request.type";
 import MiddlewareConfig from "../config/middleware.config";
 import { AuthorizationError } from "../other/custom.error";
+import { createSucessResponse } from "../other/api.helper";
 
 const fileRouter = Router();
 RouterConfig.addPathToNoTokenChecks("studentTemplate");
-const storagePath = "./.data/temp/import/";
-const upload = multer({ dest: storagePath })
+const studentStoragePath = "./.data/temp/import/";
+const studentInfoUploader = multer({ dest: studentStoragePath });
+const attachmentStoragePath = "./.data/temp/attachment/"
+const attachmentUploader = multer({ dest: attachmentStoragePath })
 
-// 信息导入模版下载
+// 学生信息导入模版下载
 fileRouter.get('/studentTemplate', (_req, res) => {
-  res.status(200).download('./resource/template/import_template.xlsx');
+  res.status(200).download('./resource/template/学生模版.xlsx');
 });
 
-// 信息导入
-fileRouter.post('/studentImport', upload.single('StuentImportToBackendFileName'), async (req, res) => {
+// 学生信息导入
+fileRouter.post('/studentImport', studentInfoUploader.single('StuentImportToBackendFileName'), async (req, res) => {
   const userId = getUserId(req);
   const result = await FilesService.handleStudentImport(userId, req.file);
   if (result) {
@@ -31,6 +34,20 @@ fileRouter.post('/studentImport', upload.single('StuentImportToBackendFileName')
   }
 });
 
+fileRouter.post('/assignment/attachment', attachmentUploader.single('tempAttachment'), async (req, res) => {
+  const userId = getUserId(req);
+  const result = await FilesService.moveAttachment(userId, req.file);
+  if (result !== null) {
+    res.status(200).json(createSucessResponse(result));
+  } else {
+    res.status(500).send("upload error!")
+  }
+})
+
+/**
+ * 使用了multer之后把body清空了，这里重新获取一次token中的userid
+ * @returns 上传者的教师ID
+ */
 const getUserId = (request: Request) => {
   const token = request.get('Authorization');
   if (token !== undefined) {
