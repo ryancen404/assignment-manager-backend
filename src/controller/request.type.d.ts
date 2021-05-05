@@ -1,6 +1,7 @@
 import { Assignment } from "../model/assignment.model";
+import { AssignmentFile } from "../model/assignmentFile.model";
 import { Classs } from "../model/classs.model";
-import { Student } from "../model/student.model";
+import { Student, StudentAssignment } from "../model/student.model";
 import { Teacher } from "../model/teacher.model";
 
 // 请求体对象类型
@@ -34,7 +35,13 @@ declare namespace Assignment {
         assignId: string,
         startTime: string,
         endTime: string,
-        classs: Class.ResBaseClass[]
+        classs: Class.ResBaseClass[],
+        files?: ResAssignmentFile[],
+        description?: string
+    }
+
+    export interface ResAssignmentFile extends AssignmentFile {
+        fileId: string
     }
 }
 
@@ -50,6 +57,10 @@ declare namespace Class {
         students: Array<Omit<Student.ResBaseStudent, "teacher">>,
     }
 
+    export interface ResDeatilClass extends ResBaseClass {
+        students: Student.ResStudentWithOneAssign[]
+    }
+
 }
 
 declare namespace Student {
@@ -61,6 +72,13 @@ declare namespace Student {
         // teacher objectIds 
         teacher?: Array<string>,
     }
+
+    // 改assignment为assignId
+    export interface ResStudentAssignment extends Omit<StudentAssignment, "assignment"> {
+        assignId: string
+    }
+
+    export type ResStudentWithOneAssign = Omit<ResBaseStudent, "assignments"> & ResStudentAssignment
 }
 
 

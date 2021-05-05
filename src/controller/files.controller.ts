@@ -42,6 +42,11 @@ fileRouter.post('/assignment/attachment', attachmentUploader.single('tempAttachm
   } else {
     res.status(500).send("upload error!")
   }
+});
+
+// 下载作业中的附件
+fileRouter.get('/assignment/attachment/:filename', (req, res) => {
+  res.status(200).download(`./.data/assignment/${req.body.userId}/${req.params["filename"]}`);
 })
 
 /**

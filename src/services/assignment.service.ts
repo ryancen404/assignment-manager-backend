@@ -1,4 +1,4 @@
-import { Assignment, Class, User } from "../controller/request.type";
+import { Assignment, Class, Student, User } from "../controller/request.type";
 import AssignmentModel, { Assignment as AssignmentDB } from '../model/assignment.model';
 import fs from 'fs';
 import AssignmentFileModel, { AssignmentFile } from "../model/assignmentFile.model";
@@ -27,10 +27,12 @@ const getAssignmentList = async (userType: User.Type, userId: string) => {
     }
 };
 
+// 转为返回所需要的类型
 const toResEasyAssignment = async (teacher: TeacherDocument) => {
     const result = await Promise.all(teacher.assignments.map(async assignId => {
-        const assignment = await AssignmentModel.findClass(assignId);
-        const classes: Class.ResBaseClass[] = assignment.class.map(clazz => {
+        const assignmentWithClass = await AssignmentModel.findClass(assignId);
+        const assignmentWithFiles = await AssignmentModel.findFiles(assignId);
+        const classes: Class.ResBaseClass[] = assignmentWithClass.class.map(clazz => {
             const resClazz: Class.ResBaseClass = {
                 classId: clazz.id,
                 className: clazz.className,
@@ -38,17 +40,27 @@ const toResEasyAssignment = async (teacher: TeacherDocument) => {
             }
             return resClazz;
         })
+        const files: Assignment.ResAssignmentFile[] = assignmentWithFiles.files.map(f => {
+            const file: Assignment.ResAssignmentFile = {
+                name: f.name,
+                fileId: f.id,
+                length: f.length
+            };
+            return file;
+        })
         const resAssignment: Assignment.ResEasyAssignment = {
             assignId,
-            assignName: assignment.assignName,
-            startTime: assignment.startTime.toLocaleDateString(),
-            endTime: assignment.endTime.toLocaleDateString(),
-            corrected: assignment.corrected,
-            status: assignment.status,
+            assignName: assignmentWithClass.assignName,
+            description: assignmentWithClass.desc,
+            startTime: assignmentWithClass.startTime.toLocaleDateString(),
+            endTime: assignmentWithClass.endTime.toLocaleDateString(),
+            corrected: assignmentWithClass.corrected,
+            status: assignmentWithClass.status,
             teacher: teacher.id,
             classs: classes,
-            total: assignment.total,
-            complete: assignment.complete,
+            total: assignmentWithClass.total,
+            complete: assignmentWithClass.complete,
+            files
         }
         return resAssignment;
     }));
@@ -60,8 +72,48 @@ const toResEasyAssignment = async (teacher: TeacherDocument) => {
  * @param assignId 作业唯一id
  * @return 找不到会为空
  */
-const getAssignmentDetail = (_assignId: string) => {
-    return null;
+const getAssignmentClasses = async (assignId: string) => {
+    try {
+        const assignmentDB = await AssignmentModel.findById(assignId);
+        if (assignmentDB === null) {
+            return null;
+        }
+        const detailClasses = await Promise.all(assignmentDB.class.map(async clazzId => {
+            const classWithStudents = await ClassModel.findMyStudents(clazzId);
+            const students: Student.ResStudentWithOneAssign[] = classWithStudents.students.map(s => {
+                const thisAssignment = s.assignments.find(a => a.assignment.equals(assignId));
+                if (thisAssignment === undefined) {
+                    throw new ParamError("the assignId is error!");
+                }
+              
+                const student: Student.ResStudentWithOneAssign = {
+                    sId: s.id,
+                    studentName: s.studentName,
+                    studentNumber: s.studentNumber,
+                    classId: classWithStudents.id,
+                    grade: s.grade,
+                    
+                    assignId: assignId,
+                    assignmentStatus: thisAssignment.assignmentStatus,
+                    corrected: thisAssignment.corrected,
+                    score: thisAssignment.score
+                }
+                return student;
+            });
+            const detailClass: Class.ResDeatilClass = {
+                classId: clazzId,
+                className: classWithStudents.className,
+                classNumber: classWithStudents.classNumber,
+                students
+            }
+            return detailClass;
+        }));
+        ServiceConfig.logger("getAssignmentClasses success, length:", detailClasses.length)
+        return detailClasses;
+    } catch (error) {
+        ServiceConfig.logger("getAssignmentClasses error: ", error);
+        return null
+    }
 };
 
 /**
@@ -105,7 +157,8 @@ const createNewAssignment = async (userId: string, assignment: Assignment.reqNew
             corrected: false,
             files: fileIds,
             total: count,
-            complete: 0
+            complete: 0,
+            desc: assignment.desc
         }
         const savedAssign = await AssignmentModel.create(newAssignment);
         ServiceConfig.logger("createNewAssignment success! id=", savedAssign.id);
@@ -175,6 +228,9 @@ const deleteAssignment = async (userId: string, assignId: string) => {
         // 删除附件
         const assignmentWithFile = await AssignmentModel.findFiles(assignId);
         await Promise.all(assignmentWithFile.files.map(async f => {
+            if (f.link === undefined) {
+                return
+            }
             fs.unlinkSync(f.link);
             await f.deleteOne();
         }));
@@ -195,7 +251,7 @@ const updateAssignment = (_assignId: string): boolean => {
 
 export default {
     getAssignmentList,
-    getAssignmentDetail,
+    getAssignmentClasses,
     createNewAssignment,
     deleteAssignment,
     updateAssignment

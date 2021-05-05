@@ -4,7 +4,7 @@ import { Document, model, Model, Schema } from 'mongoose';
 
 export interface AssignmentFile {
     name: string,
-    link: string,
+    link?: string,
     md5?: string,
     length: number
 }

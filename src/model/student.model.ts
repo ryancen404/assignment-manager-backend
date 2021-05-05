@@ -14,6 +14,11 @@ const StudentAssignmentSchema = new Schema({
         required: true,
         ref: "Assignment"
     },
+    // 上传的作业内容
+    files: [{
+        type: mongoose.Types.ObjectId,
+        ref: "AssignmentFile"
+    }],
     assignmentStatus: {
         type: Boolean,
         required: true,
