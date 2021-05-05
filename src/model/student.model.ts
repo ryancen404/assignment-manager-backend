@@ -81,7 +81,7 @@ export interface Student {
 export interface StudentDocument extends Student, Document {
     classId: ClasssDocument["_id"],
     teachers: Types.Array<TeacherDocument["_id"]>,
-    assignments?: Types.Array<StudentAssignment>,
+    assignments: Types.Array<StudentAssignment>,
 }
 
 export interface StudentPopulateTeacherDocument extends StudentDocument {
@@ -89,7 +89,7 @@ export interface StudentPopulateTeacherDocument extends StudentDocument {
 }
 
 export interface StudentPopulateAssignDocument extends StudentDocument {
-    assignments?: Types.Array<StudentAssignmentDocument>
+    assignments: Types.Array<StudentAssignmentDocument>
 }
 
 export interface StudentModel extends Model<StudentDocument> {

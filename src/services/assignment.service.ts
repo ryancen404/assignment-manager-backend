@@ -2,7 +2,7 @@ import { Assignment, Class, User } from "../controller/request.type";
 import AssignmentModel, { Assignment as AssignmentDB } from '../model/assignment.model';
 import fs from 'fs';
 import AssignmentFileModel, { AssignmentFile } from "../model/assignmentFile.model";
-import StudentModel from "../model/student.model";
+import StudentModel, { StudentAssignment } from "../model/student.model";
 import TeacherModel, { TeacherDocument, TeacherPopulateDocument } from "../model/teacher.model";
 import { Types } from "mongoose";
 import ServiceConfig from "../config/service.config";
@@ -68,11 +68,11 @@ const getAssignmentDetail = (_assignId: string) => {
  * create new Assignment
  */
 const createNewAssignment = async (userId: string, assignment: Assignment.reqNewAssignment) => {
+    const myself = await TeacherModel.findById(userId);
+    if (myself === null) {
+        throw new ParamError("user is error!")
+    }
     try {
-        const myself = await TeacherModel.findById(userId);
-        if (myself === null) {
-            throw new ParamError("user is error!")
-        }
         let fileIds = []
         if (assignment.filesName !== undefined) {
             // 将附件信息存储到db
@@ -87,7 +87,7 @@ const createNewAssignment = async (userId: string, assignment: Assignment.reqNew
                 return savedFile._id;
             }));
         }
-        const classesDB = await Promise.all(assignment.classIds.map(async id => await ClassModel.findById(id)));
+        const classesDB = await Promise.all(assignment.classIds.map(async id => await ClassModel.findMyStudents(id)));
         const classObjectIds = classesDB.filter(clazzDB => clazzDB !== null).map(clazzDB => clazzDB?._id);
         let count = 0;
         for (let i = 0; i < classesDB.length; i++) {
@@ -108,10 +108,34 @@ const createNewAssignment = async (userId: string, assignment: Assignment.reqNew
             complete: 0
         }
         const savedAssign = await AssignmentModel.create(newAssignment);
+        ServiceConfig.logger("createNewAssignment success! id=", savedAssign.id);
+        // 记录到教师的作业数组中
         myself.assignments.addToSet(savedAssign._id);
         const result = await myself.updateOne({ assignments: myself.assignments }).exec();
-        ServiceConfig.logger("createNewAssignment success! id=", savedAssign.id);
-        return savedAssign._id !== undefined && result.ok === 1;
+        if (result.ok !== 1) {
+            ServiceConfig.logger("add new assignment to teacher error");
+            return false;
+        }
+
+        // 记录到学生的作业数组中
+        const newStudentAssigment: StudentAssignment = {
+            assignment: savedAssign.id,
+            assignmentStatus: false,
+            corrected: false,
+            score: 0
+        }
+        await Promise.all(classesDB.map(async clazz => {
+            await Promise.all(clazz.students.map(async s => {
+                s.assignments.addToSet({ ...newStudentAssigment });
+                const updateResult = await s.updateOne({ assignments: s.assignments }).exec();
+                if (updateResult.ok !== 1) {
+                    ServiceConfig.logger(`student(${s.id}) add assignemnt(${savedAssign.id}) error!`);
+                } else {
+                    ServiceConfig.logger(`student(${s.id}) add assignemnt(${savedAssign.id}) success!`)
+                }
+            }));
+        }));
+        return true;
     } catch (error) {
         ServiceConfig.logger("createNewAssignment error:", error);
         return false;
@@ -121,8 +145,46 @@ const createNewAssignment = async (userId: string, assignment: Assignment.reqNew
 /**
  * 删除assignment
  */
-const deleteAssignment = (_assignId: string): boolean => {
-    return true;
+const deleteAssignment = async (userId: string, assignId: string) => {
+    const myself = await TeacherModel.findById(userId);
+    const assignment = await AssignmentModel.findById(assignId);
+    if (myself === null || assignment == null) {
+        throw new ParamError("user is error!");
+    }
+    try {
+        // 从教师的作业数组删除
+        const newAssigns = myself.assignments.filter(a => !a.equals(assignId));
+        const updateTeacherResult = await myself.updateOne({ assignments: newAssigns }).exec();
+        if (updateTeacherResult.ok !== 1) {
+            return false;
+        }
+        // 从学生的作业数组删除
+        const classesDB = await Promise.all(assignment.class.map(async clazzId =>
+            await ClassModel.findMyStudents(clazzId)));
+        await Promise.all(classesDB.map(async clazzDB => {
+            await Promise.all(clazzDB.students.map(async s => {
+                const newAssign = s.assignments.filter(a => !a.assignment.equals(assignId));
+                const updateStudentResult = await s.updateOne({ assignments: newAssign }).exec();
+                if (updateStudentResult.ok !== 1) {
+                    ServiceConfig.logger(`student(${s.id}) delete assignemnt(${assignId}) error!`);
+                } else {
+                    ServiceConfig.logger(`student(${s.id}) delete assignemnt(${assignId}) success!`)
+                }
+            }));
+        }));
+        // 删除附件
+        const assignmentWithFile = await AssignmentModel.findFiles(assignId);
+        await Promise.all(assignmentWithFile.files.map(async f => {
+            fs.unlinkSync(f.link);
+            await f.deleteOne();
+        }));
+        // 删除作业本身
+        const result = await assignment.deleteOne();
+        return true;
+    } catch (error) {
+        ServiceConfig.logger("deleteAssignment error:", error);
+        return false;
+    }
 };
 
 

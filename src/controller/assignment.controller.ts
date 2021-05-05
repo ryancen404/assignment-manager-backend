@@ -19,7 +19,7 @@ assignmentRouter.get("/", async (req, res) => {
     }
     const userId = req.body.userId;
     const assignmentList = await assignmentService.getAssignmentList(userType, userId);
-    
+
     if (assignmentList) {
         res.status(200).json(createSucessResponse(assignmentList));
     } else {
@@ -51,6 +51,20 @@ assignmentRouter.post("/", async (req, res) => {
     } else {
         res.status(500).json(createFailResponse("server handle error!"));
     }
+});
+
+assignmentRouter.delete("/:assignId", async (req, res) => {
+   const userId = req.body.userId;
+   const assignId = req.params["assignId"];
+   if (assignId === "") {
+       throw new ParamError("assigId is empty!");
+   }
+   const result = await assignmentService.deleteAssignment(userId, assignId);
+   if (result) {
+       res.status(200).json(createEmptySucessResponse());
+   } else {
+       res.status(500).json(createFailResponse("server handle error!"));
+   }
 });
 
 
