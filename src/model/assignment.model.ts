@@ -42,7 +42,15 @@ const assignmentSchema = new Schema<AssignmentDocument, AssignmentModel>({
     files: [{
         type: mongoose.Types.ObjectId,
         ref: "AssignmentFile"
-    }]
+    }],
+    total: {
+        type: Number,
+        required: true,
+    },
+    complete: {
+        type: Number,
+        default: 0
+    }
 });
 
 export type AssignmentStatus = "未开始" | "进行中" | "已结束";
@@ -65,7 +73,11 @@ export interface Assignment {
     // 是否已经批改
     corrected: boolean,
     // 关联的文件信息
-    files?: Array<Types.ObjectId>
+    files?: Array<Types.ObjectId>,
+    // 总学生数
+    total: number,
+    // 完成作业的学生数
+    complete: number,
 }
 
 export interface AssignmentDocument extends Assignment, Document {

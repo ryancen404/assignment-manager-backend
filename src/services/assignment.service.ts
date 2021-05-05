@@ -7,6 +7,7 @@ import TeacherModel, { TeacherDocument, TeacherPopulateDocument } from "../model
 import { Types } from "mongoose";
 import ServiceConfig from "../config/service.config";
 import { ParamError } from "../other/custom.error";
+import ClassModel from "../model/classs.model";
 
 /**
  * 根据用户类型和id来找到作业数组
@@ -45,7 +46,9 @@ const toResEasyAssignment = async (teacher: TeacherDocument) => {
             corrected: assignment.corrected,
             status: assignment.status,
             teacher: teacher.id,
-            classs: classes
+            classs: classes,
+            total: assignment.total,
+            complete: assignment.complete,
         }
         return resAssignment;
     }));
@@ -84,7 +87,15 @@ const createNewAssignment = async (userId: string, assignment: Assignment.reqNew
                 return savedFile._id;
             }));
         }
-        const classObjectIds = assignment.classIds.map(id => new Types.ObjectId(id));
+        const classesDB = await Promise.all(assignment.classIds.map(async id => await ClassModel.findById(id)));
+        const classObjectIds = classesDB.filter(clazzDB => clazzDB !== null).map(clazzDB => clazzDB?._id);
+        let count = 0;
+        for (let i = 0; i < classesDB.length; i++) {
+            if (classesDB[i] === null) {
+                continue;
+            }
+            count += classesDB[i]!.students.length;
+        }
         const newAssignment: AssignmentDB = {
             teacher: myself._id,
             assignName: assignment.name,
@@ -92,7 +103,9 @@ const createNewAssignment = async (userId: string, assignment: Assignment.reqNew
             endTime: new Date(assignment.endTime),
             class: classObjectIds,
             corrected: false,
-            files: fileIds
+            files: fileIds,
+            total: count,
+            complete: 0
         }
         const savedAssign = await AssignmentModel.create(newAssignment);
         myself.assignments.addToSet(savedAssign._id);
