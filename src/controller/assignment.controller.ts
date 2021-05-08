@@ -36,7 +36,6 @@ assignmentRouter.get("/class/:assignId", async (req, res) => {
     }
 });
 
-
 assignmentRouter.post("/", async (req, res) => {
     const userId = req.body.userId;
     const newAssignment = toNewAssignment(req.body);
@@ -64,6 +63,37 @@ assignmentRouter.delete("/:assignId", async (req, res) => {
         res.status(200).json(createEmptySucessResponse());
     } else {
         res.status(500).json(createFailResponse("server handle error!"));
+    }
+});
+
+// 打分
+assignmentRouter.put("/score", async (req, res) => {
+    const sId = req.body.sId;
+    const assignId = req.body.assignId;
+    const score = req.body.score
+    if (!sId || !assignId || !score) {
+        throw new ParamError("sId or assignId is empty");
+    }
+    const result = await assignmentService.updateAssignmentScore(assignId, sId, score);
+    if (result) {
+        res.status(200).json(createEmptySucessResponse());
+    } else {
+        res.status(500).json(createFailResponse("server handle error!"));
+    }
+});
+
+// 将作业标记为已经完成，即所有学生作业状态变为已批改, 该作业整体状态已经结束
+assignmentRouter.post("/complete", async (req, res) => {
+    const userId = req.body.userId;
+    const assignId = req.body.assignId;
+    if (!userId || !assignId) {
+        throw new ParamError("assignId is empty!");
+    }
+    const result = await assignmentService.completeAssignemnt(userId, assignId);
+    if (result) {
+        res.status(200).json(createEmptySucessResponse());
+    } else {
+        res.status(200).json(createFailResponse(""));
     }
 });
 

@@ -47,7 +47,8 @@ fileRouter.post('/assignment/attachment', attachmentUploader.single('tempAttachm
 // 下载作业中的附件
 fileRouter.get('/assignment/attachment/:filename', (req, res) => {
   res.status(200).download(`./.data/assignment/${req.body.userId}/${req.params["filename"]}`);
-})
+});
+
 
 /**
  * 使用了multer之后把body清空了，这里重新获取一次token中的userid

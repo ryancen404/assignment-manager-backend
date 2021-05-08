@@ -85,14 +85,14 @@ const getAssignmentClasses = async (assignId: string) => {
                 if (thisAssignment === undefined) {
                     throw new ParamError("the assignId is error!");
                 }
-              
+
                 const student: Student.ResStudentWithOneAssign = {
                     sId: s.id,
                     studentName: s.studentName,
                     studentNumber: s.studentNumber,
                     classId: classWithStudents.id,
                     grade: s.grade,
-                    
+
                     assignId: assignId,
                     assignmentStatus: thisAssignment.assignmentStatus,
                     corrected: thisAssignment.corrected,
@@ -243,10 +243,63 @@ const deleteAssignment = async (userId: string, assignId: string) => {
     }
 };
 
-
-const updateAssignment = (_assignId: string): boolean => {
-    return true;
+/**
+ * 更新分数并且设置为已经批改
+ */
+const updateAssignmentScore = async (assignId: string, sId: string, score: number) => {
+    try {
+        const studentWithAssignments = await StudentModel.findMyAssignments(sId);
+        const newAssignments = studentWithAssignments.assignments.map(a => {
+            if (a.id === assignId) {
+                return { ...a, score: score, corrected: true };
+            }
+            return a;
+        })
+        const updateResult = await studentWithAssignments.updateOne({ assignments: newAssignments }).exec();
+        ServiceConfig.logger(`studnet ${sId} update Assignment(${assignId}) Score(${score}) success`);
+        return updateResult.ok === 1;
+    } catch (error) {
+        ServiceConfig.logger("updateAssignmentScore error:", error);
+        return false
+    }
 };
+
+const completeAssignemnt = async (userId: string, assignId: string) => {
+    const assignment = await AssignmentModel.findClass(assignId);
+    if (assignment === null) {
+        throw new ParamError("assignment id is error!");
+    }
+    try {
+        const updateAssignRes = await assignment.updateOne({ corrected: true, status: "已结束", complete: assignment.total }).exec()
+        ServiceConfig.logger("completeAssignemnt", `update assignment(${assignId})`, updateAssignRes);
+        if (updateAssignRes.ok !== 1) {
+            return false;
+        }
+        for (let i in assignment.class) {
+            const clazz = assignment.class[i];
+            for (let j in clazz.students) {
+                const sId = clazz.students[j];
+                const studentDB = await StudentModel.findMyAssignments(sId);
+                const newAssigns = studentDB.assignments.map(a => {
+                    if (a.assignment.equals(assignId)) {
+                        a.corrected = true;
+                        a.assignmentStatus = true;
+                    }
+                    return a;
+                })
+                const updteRes2 = await studentDB.updateOne({ assignments: newAssigns }).exec();
+                if (updteRes2.ok !== 1) {
+                    return false;
+                }
+                ServiceConfig.logger("completeAssignemnt", `update student(${sId})`, updteRes2);
+            }
+        }
+        return true
+    } catch (error) {
+        ServiceConfig.logger("completeAssignemnt error", error);
+        return false
+    }
+}
 
 
 export default {
@@ -254,5 +307,6 @@ export default {
     getAssignmentClasses,
     createNewAssignment,
     deleteAssignment,
-    updateAssignment
+    updateAssignmentScore,
+    completeAssignemnt
 };
