@@ -9,6 +9,9 @@ import ClassModel, { Classs, ClasssDocument } from '../model/classs.model';
 import { parseString } from '../other/api.helper';
 import TeacherModel from '../model/teacher.model';
 import { getRandomInt } from '../utils/service.utils';
+import bcrypt from 'bcrypt';
+import config from "../config/env.config";
+import AssignmentFileModel, { AssignmentFile } from '../model/assignmentFile.model';
 
 /**
  * 解析xlsx录入到DB
@@ -27,11 +30,12 @@ const handleStudentImport = async (userId: string, file: Express.Multer.File) =>
     let clazz: Classs | null = null;
     let savedClazz: ClasssDocument | null = null;
     let clazzStudentIds: Types.ObjectId[] = []
-    sheets.forEach(async sheet => {
-      for (let i in sheet["data"]) {
-        const row: any[] = sheet["data"][i];
+    for (let index in sheets) {
+      const sheet = sheets[index];
+      for (let j in sheet["data"]) {
+        const row: any[] = sheet["data"][j];
         ServiceConfig.logger("read raw:", row)
-        if (i === "0") {
+        if (j === "0") {
           checkTitleRow(row);
           continue;
         }
@@ -51,7 +55,7 @@ const handleStudentImport = async (userId: string, file: Express.Multer.File) =>
       await savedClazz?.updateOne({ students: savedClazz.students });
       teacher.class.addToSet(savedClazz?._id);
       await teacher.updateOne({ class: teacher.class });
-    })
+    }
     // 删除文件
     fs.unlinkSync(originalPath);
   } catch (error) {
@@ -88,6 +92,37 @@ const moveAttachment = async (userId: string, file: Express.Multer.File) => {
   return filename;
 }
 
+const savedStuFileToDb = async (userId: string, file: Express.Multer.File) => {
+  try {
+    const oldPath = file.path;
+    const extName = path.extname(file.originalname);
+    const originalFileName = file.originalname.replace(extName, "");
+    const newDir = `./.data/assignment/stu/${userId}`
+    if (!fs.existsSync(newDir)) {
+      fs.mkdirSync(newDir, { recursive: true });
+    }
+    const newFileName = `${originalFileName}_${getRandomInt(10000)}${extName}`;
+    const newPath = `${newDir}/${newFileName}`;
+    const fileReader = fs.createReadStream(oldPath);
+    const fileWriter = fs.createWriteStream(newPath);
+    fileReader.pipe(fileWriter);
+    fs.unlinkSync(oldPath);
+
+    const newFile: AssignmentFile = {
+      name: newFileName,
+      link: newPath,
+      length: fs.statSync(newPath).size
+    }
+
+    const newFileDB = await AssignmentFileModel.create(newFile);
+    ServiceConfig.logger("creat new file in db:", newFileDB);
+    return newFileDB.id
+  } catch (error) {
+    ServiceConfig.logger("savedStuFileToDb error:", error);
+    return null
+  }
+}
+
 /**
  * 把临时附件移动到自己的目录下
  */
@@ -120,7 +155,8 @@ const moveAssignmentAttach = async (userId: string, fileNames?: string[]) => {
 const FilesService = {
   handleStudentImport,
   moveAttachment,
-  moveAssignmentAttach
+  moveAssignmentAttach,
+  savedStuFileToDb
 }
 
 export default FilesService;
@@ -143,12 +179,16 @@ const saveStudent = async (row: any[], classId: Types.ObjectId, tId: Types.Objec
   }
   const myTeahcer = []
   myTeahcer.push(tId)
+  const salt = await bcrypt.genSalt(config.USER_PWD_SALT);
+  // 默认密码是学号
+  const passwordHash = await bcrypt.hash(row[1].toString(), salt);
   const student: Student = {
     studentName: row[0],
     studentNumber: row[1].toString(),
     grade: row[4].toString(),
     classId: classId,
     teachers: myTeahcer,
+    passwordHash: passwordHash
   }
   const savedStudent = await StudentModel.create(student)
   return savedStudent._id;

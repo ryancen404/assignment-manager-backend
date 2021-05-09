@@ -69,7 +69,7 @@ export interface Assignment {
     // 关联的班级数组
     class: Array<Types.ObjectId>,
     // 作业的状态
-    status?: AssignmentStatus,
+    status: AssignmentStatus,
     // 是否已经批改
     corrected: boolean,
     // 关联的文件信息

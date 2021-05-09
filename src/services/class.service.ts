@@ -4,6 +4,7 @@ import { Class, Student } from "../controller/request.type";
 import ClassModel, { ClassPopulateDocument } from "../model/classs.model";
 import StudentModel from "../model/student.model";
 import TeacherModel from "../model/teacher.model";
+import { ParamError } from "../other/custom.error";
 
 
 const getTeacherClass = async (tid: string) => {
@@ -88,11 +89,44 @@ const deleteClassStudent = async (classId: string, sId: string) => {
   return true;
 };
 
+const deleteClass = async (userId: string, classId: string) => {
+  const teacher = await TeacherModel.findClass(userId);
+  if (teacher === null) {
+    throw new ParamError("userId is error");
+  }
+  try {
+    const newClasses = teacher.class.filter(clazz => clazz.id !== classId);
+    const updateRes = await teacher.updateOne({ class: newClasses }).exec();
+    if (updateRes.ok !== 1) {
+      return false;
+    }
+    const targetClass = teacher.class.find(clazz => clazz.id === classId);
+    if (!targetClass) {
+      return false
+    }
+    for (let index in targetClass.students) {
+      const sId = targetClass.students[index];
+      const studentDB = await StudentModel.findById(sId);
+      if (studentDB === null) continue;
+      const newTeachers = studentDB.teachers.filter(tid => !tid.equals(userId));
+      const updateRes2 = await studentDB.updateOne({ teachers: newTeachers, classId: null }).exec()
+      ServiceConfig.logger("delete student teacher res:", updateRes2);
+    }
+    const deleteRes = await ClassModel.deleteOne({ id: targetClass.id }).exec()
+    ServiceConfig.logger(`delete class(${targetClass.id} res:`, deleteRes);
+    return true
+  } catch (error) {
+    ServiceConfig.logger("deleteClass error:", error);
+    return false;
+  }
+}
+
 
 const classService = {
   getTeacherClass,
   deleteClassStudent,
-  getTeacherBaseClass
+  getTeacherBaseClass,
+  deleteClass
 };
 
 export default classService;

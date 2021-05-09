@@ -1,4 +1,4 @@
-import { Assignment } from "../model/assignment.model";
+import { Assignment, AssignmentStatus } from "../model/assignment.model";
 import { AssignmentFile } from "../model/assignmentFile.model";
 import { Classs } from "../model/classs.model";
 import { Student, StudentAssignment } from "../model/student.model";
@@ -65,7 +65,7 @@ declare namespace Class {
 
 declare namespace Student {
     // 返回的Student类型
-    export interface ResBaseStudent extends Student {
+    export interface ResBaseStudent extends Omit<Student, "passwordHash"> {
         sId: string,
         // class的ObjectId
         classId: string,
@@ -75,10 +75,24 @@ declare namespace Student {
 
     // 改assignment为assignId
     export interface ResStudentAssignment extends Omit<StudentAssignment, "assignment"> {
-        assignId: string
+        assignId: string,
+        myFile?: Assignment.ResAssignmentFile,
     }
 
-    export type ResStudentWithOneAssign = Omit<ResBaseStudent, "assignments"> & ResStudentAssignment
+    export type ResStudentWithOneAssign = Omit<ResBaseStudent, "assignments" | "passwordHash"> & ResStudentAssignment
+
+    export type ResStudentAssignmentDeatil = Omit<StudentAssignment, "assignment" | "files"> & {
+        assignId: string,
+        assignName: string,
+        tId: string,
+        teacherName: string,
+        startTime: string,
+        endTime: string,
+        files?: Assignment.ResAssignmentFile[],
+        description?: string,
+        status: AssignmentStatus,
+        myFiles: Assignment.ResAssignmentFile[],
+    }
 }
 
 

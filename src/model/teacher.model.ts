@@ -27,7 +27,7 @@ export interface TeacherDocument extends Teacher, Document {
 }
 
 export interface TeacherPopulateDocument extends TeacherDocument {
-    class: Types.Array<ClassPopulateDocument>,
+    class: Types.Array<ClasssDocument>,
     assignments: Types.Array<AssignmentDocument>,
 }
 

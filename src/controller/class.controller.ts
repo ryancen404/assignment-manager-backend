@@ -35,7 +35,16 @@ classRouter.post("/:classId", async (req, res) => {
   }
 });
 
-
+classRouter.delete("/:classId", async (req, res) => {
+  const userId = req.body.userId;
+  const classId = req.params["classId"];
+  const result = await classService.deleteClass(userId, classId);
+  if (!result) {
+    res.status(200).json(createFailResponse("classId or sId non-existent"));
+  } else {
+    res.status(200).json(createEmptySucessResponse());
+  }
+})
 
 
 export default classRouter;

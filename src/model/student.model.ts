@@ -43,10 +43,11 @@ export interface StudentAssignment {
     assignment: Types.ObjectId,
     assignmentStatus: boolean,
     corrected: boolean,
-    score: number
+    score: number,
+    files?: Array<Types.ObjectId>
 }
 
-export interface StudentAssignmentDocument extends StudentAssignment, AssignmentDocument {
+export interface StudentAssignmentDocument extends StudentAssignment, Document {
 
 }
 
@@ -71,7 +72,11 @@ const StudentSchema = new Schema<StudentDocument, StudentModel>({
         type: String,
         required: true,
     },
-    assignments: [StudentAssignmentSchema]
+    assignments: [StudentAssignmentSchema],
+    passwordHash: {
+        type: String,
+        required: true
+    }
 });
 
 export interface Student {
@@ -80,7 +85,9 @@ export interface Student {
     grade: string,
     classId: Types.ObjectId,
     teachers?: Array<Types.ObjectId>,
-    assignments?: Array<StudentAssignment>
+    assignments?: Array<StudentAssignment>,
+    // 默认密码是学号
+    passwordHash: string
 }
 
 export interface StudentDocument extends Student, Document {

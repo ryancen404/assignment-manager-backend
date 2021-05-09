@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { User } from './request.type';
 import userService from '../services/teacher.service';
 import { checkResultCorrected, createEmptySucessResponse, parseString } from '../other/api.helper';
+import RouterConfig from '../config/router.config';
 
 const teacherRouter = Router();
+RouterConfig.addPathToNoTokenChecks("user/teacher'");
 
 // 创建教师用户
-teacherRouter.post("/", async (req, res) => {
+teacherRouter.post("/signup", async (req, res) => {
     const newTeacher = toNewTeacher(req.body);
     const result = await userService.createNewTeacher(newTeacher);
     checkResultCorrected(result);

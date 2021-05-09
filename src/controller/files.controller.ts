@@ -8,15 +8,18 @@ import FilesService from "../services/files.service";
 import EnvConfig from "../config/env.config";
 import { API } from "./request.type";
 import MiddlewareConfig from "../config/middleware.config";
-import { AuthorizationError } from "../other/custom.error";
+import { AuthorizationError, ParamError } from "../other/custom.error";
 import { createSucessResponse } from "../other/api.helper";
+import AssignmentFileModel from "../model/assignmentFile.model";
 
 const fileRouter = Router();
 RouterConfig.addPathToNoTokenChecks("studentTemplate");
 const studentStoragePath = "./.data/temp/import/";
 const studentInfoUploader = multer({ dest: studentStoragePath });
 const attachmentStoragePath = "./.data/temp/attachment/"
-const attachmentUploader = multer({ dest: attachmentStoragePath })
+const attachmentUploader = multer({ dest: attachmentStoragePath });
+const studentAssignment = "./.data/temp/assignment/stu"
+const stuUploader = multer({ dest: studentAssignment })
 
 // 学生信息导入模版下载
 fileRouter.get('/studentTemplate', (_req, res) => {
@@ -44,11 +47,35 @@ fileRouter.post('/assignment/attachment', attachmentUploader.single('tempAttachm
   }
 });
 
+fileRouter.post('/assignment/stu', stuUploader.single("stuAssignFile"), async (req, res) => {
+  const userId = getUserId(req);
+  const result = await FilesService.savedStuFileToDb(userId, req.file);
+  if (result !== null && result !== "") {
+    res.status(200).json(createSucessResponse(result));
+  } else {
+    res.status(500).send("upload error!")
+  }
+})
+
 // 下载作业中的附件
-fileRouter.get('/assignment/attachment/:filename', (req, res) => {
-  res.status(200).download(`./.data/assignment/${req.body.userId}/${req.params["filename"]}`);
+fileRouter.get('/assignment/attachment/:fId', async (req, res) => {
+  const fId = req.params["fId"]
+  const fileDB = await AssignmentFileModel.findById(fId);
+  if (fileDB == null) {
+    throw new ParamError("fid error!")
+  }
+  res.status(200).download(fileDB.link!);
 });
 
+// 下载学生自己完成的作业
+fileRouter.get('/assignment/student/:fId', async (req, res) => {
+  const fId = req.params["fId"]
+  const fileDB = await AssignmentFileModel.findById(fId);
+  if (fileDB == null) {
+    throw new ParamError("fid error!")
+  }
+  res.status(200).download(fileDB.link!);
+});
 
 /**
  * 使用了multer之后把body清空了，这里重新获取一次token中的userid

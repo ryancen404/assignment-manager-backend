@@ -2,7 +2,7 @@ import { Assignment, Class, Student, User } from "../controller/request.type";
 import AssignmentModel, { Assignment as AssignmentDB } from '../model/assignment.model';
 import fs from 'fs';
 import AssignmentFileModel, { AssignmentFile } from "../model/assignmentFile.model";
-import StudentModel, { StudentAssignment } from "../model/student.model";
+import StudentModel, { StudentAssignment, StudentPopulateAssignDocument } from "../model/student.model";
 import TeacherModel, { TeacherDocument, TeacherPopulateDocument } from "../model/teacher.model";
 import { Types } from "mongoose";
 import ServiceConfig from "../config/service.config";
@@ -23,9 +23,67 @@ const getAssignmentList = async (userType: User.Type, userId: string) => {
         return assignmentList;
     } else {
         const studentAssignments = await StudentModel.findMyAssignments(userId);
-        return studentAssignments.assignments;
+        const assignmentList = await toResStuEasyAssignment(studentAssignments);
+        return assignmentList;
     }
 };
+
+const toResStuEasyAssignment = async (stuAssignment: StudentPopulateAssignDocument): Promise<Student.ResStudentAssignmentDeatil[]> => {
+    const assignments = stuAssignment.assignments;
+    const result: Student.ResStudentAssignmentDeatil[] = [];
+    for (let index in assignments) {
+        const stuAssignment = assignments[index];
+        const assignment = await AssignmentModel.findById(stuAssignment.assignment).populate("teacher").exec();
+        if (assignment === null) {
+            continue;
+        }
+        // 作业附件
+        const assignmentWithFile = await AssignmentModel.findFiles(assignment.id);
+        const files: Assignment.ResAssignmentFile[] = assignmentWithFile.files.map(f => {
+            const file: Assignment.ResAssignmentFile = {
+                name: f.name,
+                fileId: f.id,
+                length: f.length,
+                link: f.link
+            };
+            return file;
+        });
+        // 学生完成的作业信息
+        const myFiles: Assignment.ResAssignmentFile[] = []
+        for (let i in stuAssignment.files) {
+            const fileId = stuAssignment.files[Number(i)];
+            const fileDB = await AssignmentFileModel.findById(fileId);
+            if (fileDB === null) {
+                continue
+            }
+            const file: Assignment.ResAssignmentFile = {
+                name: fileDB.name,
+                fileId: fileDB.id,
+                length: fileDB.length,
+                link: fileDB.link
+            };
+            myFiles.push(file);
+        }
+
+        const stuAssign: Student.ResStudentAssignmentDeatil = {
+            assignId: assignment.id,
+            corrected: stuAssignment.corrected,
+            assignmentStatus: stuAssignment.assignmentStatus,
+            score: stuAssignment.score,
+            assignName: assignment.assignName,
+            teacherName: assignment.teacher.username,
+            status: assignment.status,
+            tId: assignment.teacher.id,
+            startTime: assignment.startTime.toLocaleDateString(),
+            endTime: assignment.endTime.toLocaleDateString(),
+            files,
+            description: assignment.desc,
+            myFiles
+        }
+        result.push(stuAssign);
+    }
+    return result;
+}
 
 // 转为返回所需要的类型
 const toResEasyAssignment = async (teacher: TeacherDocument) => {
@@ -44,7 +102,8 @@ const toResEasyAssignment = async (teacher: TeacherDocument) => {
             const file: Assignment.ResAssignmentFile = {
                 name: f.name,
                 fileId: f.id,
-                length: f.length
+                length: f.length,
+                link: f.link
             };
             return file;
         })
@@ -78,14 +137,31 @@ const getAssignmentClasses = async (assignId: string) => {
         if (assignmentDB === null) {
             return null;
         }
-        const detailClasses = await Promise.all(assignmentDB.class.map(async clazzId => {
+        const classes: Class.ResDeatilClass[] = []
+        for (let clazzIndex in assignmentDB.class) {
+            const clazzId = assignmentDB.class[clazzIndex];
             const classWithStudents = await ClassModel.findMyStudents(clazzId);
-            const students: Student.ResStudentWithOneAssign[] = classWithStudents.students.map(s => {
+            const students: Student.ResStudentWithOneAssign[] = [];
+
+            for (let sIndex in classWithStudents.students) {
+                const s = classWithStudents.students[sIndex];
                 const thisAssignment = s.assignments.find(a => a.assignment.equals(assignId));
                 if (thisAssignment === undefined) {
                     throw new ParamError("the assignId is error!");
                 }
-
+                let myFile: Assignment.ResAssignmentFile | undefined = undefined;
+                if (thisAssignment.files !== undefined) {
+                    const fId = thisAssignment.files[0]
+                    const fileDB = await AssignmentFileModel.findById(fId);
+                    if (fileDB !== null) {
+                        myFile = {
+                            name: fileDB.name,
+                            link: fileDB.link,
+                            fileId: fileDB.id,
+                            length: fileDB.length
+                        }
+                    }
+                }
                 const student: Student.ResStudentWithOneAssign = {
                     sId: s.id,
                     studentName: s.studentName,
@@ -96,20 +172,21 @@ const getAssignmentClasses = async (assignId: string) => {
                     assignId: assignId,
                     assignmentStatus: thisAssignment.assignmentStatus,
                     corrected: thisAssignment.corrected,
-                    score: thisAssignment.score
+                    score: thisAssignment.score,
+                    myFile
                 }
-                return student;
-            });
+                students.push(student);
+            }
             const detailClass: Class.ResDeatilClass = {
                 classId: clazzId,
                 className: classWithStudents.className,
                 classNumber: classWithStudents.classNumber,
                 students
             }
-            return detailClass;
-        }));
-        ServiceConfig.logger("getAssignmentClasses success, length:", detailClasses.length)
-        return detailClasses;
+            classes.push(detailClass);
+        }
+        ServiceConfig.logger("getAssignmentClasses success, length:", classes.length)
+        return classes;
     } catch (error) {
         ServiceConfig.logger("getAssignmentClasses error: ", error);
         return null
@@ -158,7 +235,8 @@ const createNewAssignment = async (userId: string, assignment: Assignment.reqNew
             files: fileIds,
             total: count,
             complete: 0,
-            desc: assignment.desc
+            desc: assignment.desc,
+            status: "未开始"
         }
         const savedAssign = await AssignmentModel.create(newAssignment);
         ServiceConfig.logger("createNewAssignment success! id=", savedAssign.id);
@@ -215,6 +293,9 @@ const deleteAssignment = async (userId: string, assignId: string) => {
         const classesDB = await Promise.all(assignment.class.map(async clazzId =>
             await ClassModel.findMyStudents(clazzId)));
         await Promise.all(classesDB.map(async clazzDB => {
+            if (clazzDB === null) {
+                return
+            }
             await Promise.all(clazzDB.students.map(async s => {
                 const newAssign = s.assignments.filter(a => !a.assignment.equals(assignId));
                 const updateStudentResult = await s.updateOne({ assignments: newAssign }).exec();
@@ -245,13 +326,15 @@ const deleteAssignment = async (userId: string, assignId: string) => {
 
 /**
  * 更新分数并且设置为已经批改
+ * 嵌套类型需要调用整个对象的update
  */
 const updateAssignmentScore = async (assignId: string, sId: string, score: number) => {
     try {
         const studentWithAssignments = await StudentModel.findMyAssignments(sId);
         const newAssignments = studentWithAssignments.assignments.map(a => {
-            if (a.id === assignId) {
-                return { ...a, score: score, corrected: true };
+            if (a.assignment.equals(assignId)) {
+                a.score = score;
+                a.corrected = true
             }
             return a;
         })
@@ -301,6 +384,44 @@ const completeAssignemnt = async (userId: string, assignId: string) => {
     }
 }
 
+const stuCompleteAssignment = async (userId: string, assignId: string, fileId: string) => {
+
+    const studentWithAssign = await StudentModel.findMyAssignments(userId);
+    const theStuAssignment = studentWithAssign.assignments.find(a => a.assignment.equals(assignId));
+    if (theStuAssignment === undefined) {
+        return false
+    }
+    const theAssignment = await AssignmentModel.findById(theStuAssignment.id);
+    if (theAssignment == null) {
+        return false;
+    }
+    let isModify = false;
+    if (theStuAssignment.files !== undefined && theStuAssignment.files.length > 0) {
+        isModify = true;
+    }
+    const newFilesId = [Types.ObjectId(fileId)];
+    const newAssignment: StudentAssignment = {
+        assignment: theStuAssignment.assignment,
+        assignmentStatus: true,
+        files: newFilesId,
+        corrected: false,
+        score: 0
+    }
+    const newAssignments = studentWithAssign.assignments.map(a => {
+        if (a.assignment.equals(newAssignment.assignment)) {
+            return newAssignment
+        }
+        return a;
+    })
+    const updateRes = await studentWithAssign.updateOne({ assignments: newAssignments }).exec();
+    ServiceConfig.logger("stuCompleteAssignment stu updateRes: ", updateRes);
+    if (!isModify) {
+        const updateRes2 = await theAssignment.updateOne({ complete: theAssignment.complete + 1 }).exec();
+        ServiceConfig.logger("stuCompleteAssignment assignemnt updateRes: ", updateRes2);
+    }
+    return updateRes.ok === 1;
+}
+
 
 export default {
     getAssignmentList,
@@ -308,5 +429,6 @@ export default {
     createNewAssignment,
     deleteAssignment,
     updateAssignmentScore,
-    completeAssignemnt
+    completeAssignemnt,
+    stuCompleteAssignment
 };

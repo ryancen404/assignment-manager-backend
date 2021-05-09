@@ -97,6 +97,22 @@ assignmentRouter.post("/complete", async (req, res) => {
     }
 });
 
+// 学生将自己的作业状态设置为完成
+assignmentRouter.post("/complete/stu", async (req, res) => {
+    const userId = req.body.userId;
+    const assignId = req.body.assignId;
+    const fileId = req.body.fileId;
+    if (!userId || !assignId || !fileId) {
+        throw new ParamError("param is error");
+    }
+    const result = await assignmentService.stuCompleteAssignment(userId, assignId, fileId);
+    if (result) {
+        res.status(200).json(createEmptySucessResponse());
+    } else {
+        res.status(200).json(createFailResponse("server handle error!"));
+    }
+})
+
 
 type NewAssignmentField = {
     name: unknown,

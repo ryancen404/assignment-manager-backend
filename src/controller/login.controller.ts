@@ -7,6 +7,7 @@ import { createSucessResponse, parseNumber, parseString } from '../other/api.hel
 import { API, Login } from './request.type';
 import config from '../config/env.config';
 import RouterConfig from '../config/router.config';
+import StudentService from '../services/student.service';
 
 const loginRouter = Router();
 RouterConfig.addPathToNoTokenChecks("login");
@@ -32,9 +33,35 @@ loginRouter.post("/", async (req, res) => {
       type: 0
     };
     const token = jwt.sign(userForToken, config.TOKEN_SECRET);
-    res.status(200).json(createSucessResponse(token));
+    const response = {
+      token,
+      username: teacher.username,
+      uid: teacher.id,
+      type: 0
+    }
+    res.status(200).json(createSucessResponse({ ...response }));
   } else {
-    // const reuslt = await studentService.getStudent(loginParams);
+    const student = await StudentService.getStudentByStuNumber(loginParams.account);
+    if (student === null) {
+      throw new ParamError("账号不存在");
+    }
+    const passwordCorrrect = await bcrypt.compare(loginParams.password, student.passwordHash);
+    if (!passwordCorrrect) {
+      throw new ParamError("密码错误!");
+    }
+    const userForToken: API.UserToken = {
+      account: student.studentNumber,
+      id: student.id,
+      type: 1
+    };
+    const token = jwt.sign(userForToken, config.TOKEN_SECRET);
+    const response = {
+      token,
+      username: student.studentName,
+      uid: student.id,
+      type: 1
+    }
+    res.status(200).json(createSucessResponse({ ...response }));
   }
 });
 
