@@ -111,7 +111,7 @@ const savedStuFileToDb = async (userId: string, file: Express.Multer.File) => {
     const newFile: AssignmentFile = {
       name: newFileName,
       link: newPath,
-      length: fs.statSync(newPath).size
+      length: 0
     }
 
     const newFileDB = await AssignmentFileModel.create(newFile);

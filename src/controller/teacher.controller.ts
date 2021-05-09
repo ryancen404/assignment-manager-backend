@@ -5,7 +5,7 @@ import { checkResultCorrected, createEmptySucessResponse, parseString } from '..
 import RouterConfig from '../config/router.config';
 
 const teacherRouter = Router();
-RouterConfig.addPathToNoTokenChecks("user/teacher'");
+RouterConfig.addPathToNoTokenChecks('/api/user/teacher/signup');
 
 // 创建教师用户
 teacherRouter.post("/signup", async (req, res) => {

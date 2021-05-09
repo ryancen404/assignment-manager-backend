@@ -391,7 +391,7 @@ const stuCompleteAssignment = async (userId: string, assignId: string, fileId: s
     if (theStuAssignment === undefined) {
         return false
     }
-    const theAssignment = await AssignmentModel.findById(theStuAssignment.id);
+    const theAssignment = await AssignmentModel.findById(assignId);
     if (theAssignment == null) {
         return false;
     }
